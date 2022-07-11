@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+
+{% block body %}
+{% csrf_token %}
+{% include 'menu.html'%}
+{% if annonce != "" %} {{ annonce.contenu }} <BR><BR>{% endif %}
+{% if information != "" %} {{ information.contenu }} <BR><BR>{% endif %}
+
+<fieldset>
+    <legend>Liste des créneaux disponibles : (créneaux sélectionnés en orange)</legend>
+    <div class="creneaux" id="creneaux_general">
+    </div>
+</fieldset>
+
+<script>
+    click_creneau(0,false)
+</script>
+{% endblock body %}

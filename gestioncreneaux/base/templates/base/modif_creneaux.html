@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block body %}
+{% csrf_token %}
+{% include 'menu.html'%}
+<BR><BR>Liste des créneaux disponibles : <BR><BR><BR>
+<div id="liste_creneau">
+</div>
+
+<script src="{% static 'js/java_admin_modif.js' %}" ></script> 
+<script>
+    supprime(0,false)
+</script>
+{% endblock body %}

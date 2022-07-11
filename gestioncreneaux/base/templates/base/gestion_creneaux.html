@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block body %}
+{% csrf_token %}
+{% include 'menu.html'%}
+
+<BR><BR>
+    <form id="le_formulaire_index" class="formulaire_index center" method="post" action="index.php">
+        <input type="hidden" name="validation" value="">
+    <fieldset>
+        <legend>Liste des créneaux disponibles : (créneaux sélectionnés en orange)</legend>
+    <div class="creneaux_staff" id="creneaux_staff">      
+    </div>
+    </fieldset><BR>
+    </form>
+
+<script>
+    click_staff(0,false)
+</script>
+{% endblock body %}

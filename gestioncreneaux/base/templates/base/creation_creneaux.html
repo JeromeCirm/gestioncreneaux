@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block body %}
+{% include 'menu.html'%}
+
+<div class="formulaire">
+<form method="POST" action="">
+    {% csrf_token %}
+    <div class="item_formulaire">
+        <label for="id_date">Date:</label>
+        <input type="date" name="date" required id="id_date">
+    </div>
+    <div class="item_formulaire">
+        <label for="id_intitulé">Intitulé:</label>
+        <input type="text" name="intitulé" maxlength="100" required id="id_intitulé">
+    </div> 
+    <div class="item_formulaire">
+        <label for="id_text_bouton">Texte du bouton:</label>
+        <input type="text" name="text_bouton" maxlength="100" required id="id_text_bouton">
+    </div> 
+    <div class="item_formulaire">
+        <label for="id_avec_inscription">Avec inscription ? </label>
+        <input type="checkbox" name="avec_inscription" id="id_avec_inscription">
+    </div>
+    <div class="item_formulaire">
+        <label for="id_avec_commentaire">Avec commentaire ? </label>
+        <input type="checkbox" name="avec_commentaire" id="id_avec_commentaire">        
+    </div>
+    
+    <input type="submit" value="Créer le créneau"/>
+</form>
+<div>
+    <label class="round green pointer" onclick="jeu_libre_classique()"> Jeu libre classique</label><BR>
+    <label class="round green pointer" onclick="jeu_libre_inscription()"> Jeu libre avec inscription</label><BR>
+    <label class="round green pointer" onclick="cmb()"> Crazy Morning</label>
+
+</div>
+</div><BR>
+
+Rappel des créneaux existants :
+<ul> {% for x in creneaux %}
+    <li> {{ x.date }} : {{ x.intitulé }} --  {% if x.avec_inscription %} <span class="blue">avec</span> {% else %} sans {% endif %} inscription - {% if x.avec_commentaire %} avec {% else %} sans {% endif %} commentaire </li>{% endfor %}
+</ul>
+<script src="{% static 'js/java_admin.js' %}"defer ></script>
+{% endblock body %}
+
+
+    
+    

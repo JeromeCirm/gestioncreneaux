@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+
+{% block body %}
+{% include 'menu.html'%}
+En <span class='cred center'>rouge</span> les personnes disponibles si besoin
+<div class="creneaux_recapitulatif center">{% for key,x in creneau_et_staff.items %} 
+    <div {% if x.nb == 0 %} class="cwhite red" {% endif %}> {{ x.date }} : {{ x.intitulé }}</div>
+    <div> {% for y in x.present %} {{y}}, {% endfor %} {% if x.sibesoin %} <span class="cred">
+          {% for y in x.sibesoin %} {{y}}, {% endfor %} </span> {% endif %}</div> {% endfor %}
+</div>
+{% endblock body %}

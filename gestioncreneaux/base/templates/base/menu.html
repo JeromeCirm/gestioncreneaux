@@ -1,0 +1,10 @@
+<header>
+    <nav class="menu">
+        <ul>{% for item in menu %}
+            <li ><a href="{% url item.0 %}">{{ item.1 }}</a>                                                
+            </li>{% endfor %}{% if user.is_authenticated %}
+            <li> <a href="{% url 'reglages' %}"> Réglages</a></li>
+            <li> <a href="{% url 'deconnexion' %}"> Déconnexion</a></li>{% endif %}
+        </ul>
+    </nav>
+</header>
