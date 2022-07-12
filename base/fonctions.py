@@ -2,6 +2,7 @@ import datetime
 import locale
 from django.contrib.auth.models import Group
 from .models import *
+from .config import *
 
 # premier groupe : pour autoriser un créneau pour tout le monde
 sans_groupe=Group.objects.get(name="tout le monde")
@@ -252,9 +253,9 @@ def demande_creation_compte(request):
     new_utilisateur=Utilisateur(user=new_user,telephone="",csrf_token=le_hash,date_demande=datetime.datetime.now())
     new_utilisateur.save()
     msg="Bonjour "+prenom+",\n\nVoici le lien pour activer le compte sur le site SSA (valable 7 jours): \n" 
-    msg+="http://127.0.0.1:8000/validation_compte/"+login+"/"+le_hash
+    msg+=MA_URL_COMPLETE+"validation_compte/"+login+"/"+le_hash
     msg+="\n\nL'équipe SSA"    
-    envoie_mail(['jerome.99@hotmail.fr'],'inscription site SSA',msg)
+    envoie_mail([mail],'inscription site SSA',msg)
     return True,"reussi"
 
 # vérifie si on peut activer le compte login.
@@ -279,9 +280,9 @@ from email.message import EmailMessage
 from ssl import create_default_context
 
 def envoie_mail(liste_destinataire,sujet,corps_mail):
-    smtpserver = smtplib.SMTP("mail.infomaniak.com",587)
-    user = ''
-    password = ''
+    smtpserver = smtplib.SMTP(ENVOIE_MAIL_HOST,ENVOIE_MAIL_PORT)
+    user = ENVOIE_MAIL_USER
+    password = ENVOIE_MAIL_PASSWORD
     smtpserver.starttls(context=create_default_context())
     smtpserver.ehlo()
     smtpserver.login(user, password)
