@@ -18,7 +18,7 @@ def jolie_date(date):
 #fonctions définissant les menus selon le groupe de l'utilisateur
 def menu_general(request):
     menu=[
-        ["creneaux","Les créneaux"],
+        ["creneaux","Créneaux"],
         ["informations","Infos"],
     ]
     if request.user.is_authenticated:
