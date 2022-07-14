@@ -12,7 +12,7 @@ groupe_gestion_generale=Group.objects.get(name="gestion_generale")
 groupe_gestion_creneaux=Group.objects.get(name="gestion_creneaux")
 
 #fonctions générales
-#locale.setlocale(locale.LC_ALL,'french')
+locale.setlocale(locale.LC_ALL,'french')
 def jolie_date(date):
     return date.strftime('%A %e %B')
 
