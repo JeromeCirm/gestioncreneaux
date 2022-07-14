@@ -1,6 +1,90 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block body %}
 {% include 'menu.html'%}
-Gestion générale
+
+{% if err %} <span class="cred"><BR>{{ err }} </span>{% endif %}
+<BR>
+<DIV>
+    <FORM  method="post" action="">
+        {% csrf_token %}
+            <legend class="center">Création d'un compte:</legend><BR>
+     <div class="center"> <!-- grid layout on fieldset is buggy on Chrome -->
+        <label for="login">Login</label>
+        <input id="login" name="login" value="{{ login }}" required/>
+        <label for="prenom">Prénom</label>
+        <input id="prenom" name="prenom" value="{{ prenom }}" required/>
+        <label for="nom">Nom</label>
+        <input id="nom" name="nom" value="{{ nom }}"/>
+        <label for="mail">Mail</label>
+        <input type="email" id="mail" name="mail" value="{{ mail }}" required/>
+        <label for="telephone">Téléphone</label>
+        <input id="telephone" name="telephone" value="{{ telephone }}"/><BR><BR>
+        <label for="id_gr_staff"> Groupe staff ? </label>
+        <input type="checkbox" name="gr_staff" id="id_gr_staff">
+        <label for="id_gr_gestion"> Groupe gestion créneaux ? </label>
+        <input type="checkbox" name="gr_gestion" id="id_gr_gestion">
+        <label for="id_gr_admin"> Groupe admin ? </label>
+        <input type="checkbox" name="gr_admin" id="id_gr_admin">                
+        <label for="password">mot de passe :</label>        
+        <input id="password" name="password" value="staff"/>
+        <label for="confirmation">confirmation</label>        
+        <input id="confirmation" name="confirmation"/>
+        <input type="hidden" name="action" value="ajout" /><BR><BR>
+        <input class="bouton" type="submit" value="Créer le compte avec ces informations">
+    </div>
+    </FORM>
+</DIV><BR><BR>
+
+<DIV>
+    <FORM  method="post" action="">
+        {% csrf_token %}
+            <legend class="center">Modifier les données de :
+            <select id="select" onchange="ajusteDonnees()">{% for key,value in lescomptes.items %}
+                <option value="{{ key }}"> {{ value.login }}</option>{% endfor %}
+            </select> 
+            </legend><BR>
+     <div class="center"> <!-- grid layout on fieldset is buggy on Chrome -->
+        <input type="hidden" id="mpk" name="mpk"/>
+        <label for="mprenom">Prénom</label>
+        <input id="mprenom" name="mprenom" value="{{ prenom }}" required/>
+        <label for="mnom">Nom</label>
+        <input id="mnom" name="mnom" value="{{ nom }}" required/>
+        <label for="mmail">Mail</label>
+        <input type="email" id="mmail" name="mmail" value="{{ mail }}" required/>
+        <label for="mtelephone">Téléphone</label>
+        <input id="mtelephone" name="mtelephone" value="{{ telephone }}"/><BR><BR>
+        <label for="mmid_gr_staff"> Groupe staff ? </label>
+        <input type="checkbox" name="gr_staff" id="mid_gr_staff">
+        <label for="mid_gr_gestion"> Groupe gestion créneaux ? </label>
+        <input type="checkbox" name="gr_gestion" id="mid_gr_gestion">
+        <label for="mid_gr_admin"> Groupe admin ? </label>
+        <input type="checkbox" name="gr_admin" id="mid_gr_admin">                
+        <label for="mconfirmation">confirmation</label>        
+        <input id="mconfirmation" name="mconfirmation"/>
+        <input type="hidden" name="action" value="modifie" />
+        <div></div><BR>
+        <input class="bouton" type="submit" value="Modifier les données de ce compte">
+    </div>
+    </FORM>
+</DIV>
+
+<div>
+    <form method="post" action="">
+        {% csrf_token %}
+        <legend>Annonce de la page d'accueil :</legend>
+        <textarea class="annonce" style="width : 80%;" rows=10 name="annonce">{{ annonce }}
+        </textarea>
+        <input type="hidden" name="action" value="annonce" /><BR><BR>
+        <input class="bouton" type="submit" value="Mettre à jour le texte de l'annonce">
+       </form>
+</div><BR><BR>
+
+<script src="{% static 'js/java_admin_generale.js' %}" ></script>
+<script>
+    lescomptes={ {% for key,value in lescomptes.items %} "{{ key }}" : { "login" : "{{ value.login }}","prenom" : "{{ value.prenom }}","nom" : "{{ value.nom }}","mail" : "{{ value.mail }}","telephone" : "{{ value.telephone }}","is_staff" : "{{ value.is_staff }}","is_gestion" : "{{ value.is_gestion}}","is_admin" : "{{ value.is_admin }}"}, {% endfor %}}
+    ajusteDonnees()
+</script>
+
 {% endblock body %}

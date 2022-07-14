@@ -166,7 +166,17 @@ def modif_creneaux(request):
 #pages accessibles aux gestionnaires avec tous les droits
 @auth([groupe_gestion_generale])
 def gestion_generale(request):
-    context={"menu" : menu_gestion(request)}
+    res,err=None,""
+    if request.method=='POST':
+        if 'action' in request.POST:
+            if request.POST['action']=='ajout':
+                res,err=ajout_compte(request)
+            if request.POST['action'] =='modifie':
+                res,err=modifie_compte(request)
+            if request.POST['action']=='annonce':
+                res,err=modifie_annonce(request)
+    context={"menu" : menu_gestion(request),"lescomptes" : recupere_comptes(),
+     "reussi" : res, "err" : err, "annonce" : recupere_txt_annonce() }
     return render(request,'base/gestion_generale.html',context)
 
 @auth([groupe_gestion_generale])

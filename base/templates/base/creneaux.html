@@ -3,8 +3,7 @@
 {% block body %}
 {% csrf_token %}
 {% include 'menu.html'%}
-{% if annonce != "" %} {{ annonce.contenu }} <BR><BR>{% endif %}
-{% if information != "" %} {{ information.contenu }} <BR><BR>{% endif %}
+{% if annonce != "" %} <BR>{{ annonce.contenu }} <BR><BR>{% endif %}
 
 <fieldset>
     <legend>Liste des créneaux disponibles : (créneaux sélectionnés en orange)</legend>

@@ -24,8 +24,9 @@ partie gestion staff */
 function affiche_creneau_staff(creneaux,inscription) {
     var divCreneaux=document.getElementById('creneaux_staff')
     divCreneaux.innerHTML="";
-    for (var inter in creneaux) {
-        creneau=creneaux[inter]
+    for (var tmp in creneaux) {
+        creneau=creneaux[tmp]
+        inter=creneau.pk
         var noeud=document.createElement('div')
         noeud.innerHTML=creneau.date+" : "+creneau["intitulé"]
         if (creneau.staff==0) {
@@ -85,8 +86,9 @@ partie principale accessible à tous */
 function affiche_creneau_general(creneaux,inscription) {
     var divCreneaux=document.getElementById('creneaux_general')
     divCreneaux.innerHTML="";
-    for (var inter in creneaux) {
-        creneau=creneaux[inter]
+    for (var tmp in creneaux) {
+        creneau=creneaux[tmp]
+        inter=creneau.pk
         var noeud=document.createElement('div')
         noeud.innerHTML=creneau.date+" :<BR>"+creneau["intitulé"]
         divCreneaux.appendChild(noeud)

@@ -58,8 +58,9 @@ function supprime(id,avecclick=true) {
 function affiche_creneau(creneaux) {
     var divCreneaux=document.getElementById('liste_creneau')
     divCreneaux.innerHTML="";
-    for (var inter in creneaux) {
-        creneau=creneaux[inter]
+    for (var tmp in creneaux) {
+        creneau=creneaux[tmp]
+        inter=creneau.pk
         lid=inter.toString()+'_'
         var noeud=document.createElement('div')
         noeud.setAttribute('id',inter)

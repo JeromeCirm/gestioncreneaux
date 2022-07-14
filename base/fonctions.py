@@ -1,5 +1,6 @@
 import datetime
 import locale
+from re import U
 from django.contrib.auth.models import Group
 from .models import *
 from .config import *
@@ -11,7 +12,7 @@ groupe_gestion_generale=Group.objects.get(name="gestion_generale")
 groupe_gestion_creneaux=Group.objects.get(name="gestion_creneaux")
 
 #fonctions générales
-locale.setlocale(locale.LC_ALL,'french')
+#locale.setlocale(locale.LC_ALL,'french')
 def jolie_date(date):
     return date.strftime('%A %e %B')
 
@@ -19,7 +20,7 @@ def jolie_date(date):
 def menu_general(request):
     menu=[
         ["creneaux","Créneaux"],
-        ["informations","Infos"],
+        #["informations","Infos"],
     ]
     if request.user.is_authenticated:
         lesgroupes=request.user.groups.all()
@@ -34,10 +35,10 @@ def menu_general(request):
 def menu_staff(request):
     menu=[
         ["creneaux","jeu libre"],
-        ["gestion_creneaux","gestion_creneaux"],
+        ["gestion_creneaux","gestion creneaux"],
         ["recapitulatif","recapitulatif"],
-        ["inscrits","inscrits"],
-        ["coordonnees","coordonnees"],
+        #["inscrits","inscrits"],
+        #["coordonnees","coordonnees"],
     ]
     lesgroupes=request.user.groups.all()
     if groupe_gestion_creneaux in lesgroupes:
@@ -48,9 +49,9 @@ def menu_gestion(request):
     menu=[
         ["creneaux","jeu libre"],
         ["gestion_creneaux","Menu Staff"],
-        ["creation_creneaux","creation_creneaux"],
-        ["modif_creneaux","modif_creneaux"],
-        ["gestion_generale","gestion_generale"],
+        ["creation_creneaux","creation creneaux"],
+        ["modif_creneaux","modif creneaux"],
+        ["gestion_generale","gestion generale"],
         ["initialisation","initialisation"],
     ]
     return menu
@@ -62,25 +63,30 @@ def menu_gestion(request):
 # évènement extérieur : staff ok pour gérer mais pas d'inscription à l'évent.
 def recupere_creneaux(request,tous=False):
     if tous:
-        creneaux=Creneaux.objects.filter(date__gte=datetime.datetime.now())
+        creneaux=Creneaux.objects.filter(date__gte=datetime.datetime.now()).order_by('date')
     else:
         lesgroupes_q=request.user.groups.all()
         lesgroupes=[x for x in lesgroupes_q]+[sans_groupe]
-        creneaux=Creneaux.objects.filter(date__gte=datetime.datetime.now(),autorisation__groupe__in=lesgroupes)
+        creneaux=Creneaux.objects.filter(date__gte=datetime.datetime.now(),autorisation__groupe__in=lesgroupes).order_by('date')
     return creneaux
 
 # récupère les créneaux existants et autorisés pour les groupes de l'utilisateur
 # en renvoyant un dictionnaire pour json
 # joli=True pour transformer les dates en format français lisible
+# on veux garder l'ordre et json réordonne par les clefs donc attention
+# d'où une liste et non un dictionnaire
 def json_creneaux(request,tous=False,joli=True):
+    def aux(pk): # compte le nb d'inscrits du créneau pk
+        val=0
+        for x in inscrits:
+            if x.idcreneau.pk==pk:
+                val+=1
+        return val
     creneaux=recupere_creneaux(request,tous)
     inscrits=Inscription.objects.filter(statut="inscrit")
-    res={ x.pk : {"date": jolie_date(x.date) if joli else str(x.date),"intitulé" : x.intitulé,"text_bouton" : x.text_bouton,
+    res=[ {"pk" : x.pk,"date": jolie_date(x.date) if joli else str(x.date),"intitulé" : x.intitulé,"text_bouton" : x.text_bouton,
     "avec_inscription" : x.avec_inscription,"avec_commentaire" : x.avec_commentaire,
-    "staff" : x.staff,"nbinscrits" : 0} for x in creneaux}
-    for x in inscrits:
-        if x.idcreneau.pk in res:
-            res[x.idcreneau.pk]["nbinscrits"]+=1
+    "staff" : x.staff,"nbinscrits" : aux(x.pk)} for x in creneaux]
     return res
 
 # json de la liste des inscriptions de l'utilisateur
@@ -295,3 +301,104 @@ def envoie_mail(liste_destinataire,sujet,corps_mail):
         msg['To'] = to
         smtpserver.send_message(msg)
     smtpserver.close()
+
+# création d'un compte staff
+# vérifie que le login est dispo. 
+# à faire : Si non, propose d'ajouter au groupe staff la personne
+def ajout_compte(request):
+    try:
+        login=request.POST['login']
+        nom=request.POST['nom']
+        prenom=request.POST['prenom']
+        mail=request.POST['mail']
+        telephone=request.POST['telephone']
+        password=request.POST['password']
+        user=User.objects.filter(username=login)
+        if len(user)>0:
+            return False,"Ce login est déjà utilisé"
+        if ('gr_gestion' in request.POST or 'gr_admin' in request.POST ) and (request.POST['confirmation']!='CONFIRMATION'):
+            return False,"Pour créer un compte gestion ou admin, il faut entre CONFIRMATION dans le champs de confirmation"
+        new_user=User.objects.create_user(username=login,first_name=prenom,last_name=nom,email=mail,password=password)
+        new_user.save()
+        if 'gr_staff' in request.POST:
+            groupe_staff.user_set.add(new_user)
+        if 'gr_gestion' in request.POST:
+            groupe_gestion_creneaux.user_set.add(new_user)
+        if 'gr_admin' in request.POST:
+            groupe_gestion_generale.user_set.add(new_user)
+        new_utilisateur=Utilisateur(user=new_user,telephone=telephone,csrf_token="e",date_demande=datetime.datetime.now(),en_attente_confirmation=False)
+        new_utilisateur.save() 
+        msg="Bonjour "+prenom+",\n\n"
+        msg+="Ton compte vient d'être créé sur le site SSA.\n"
+        msg+="Ton login est : "+login+ " et ton mot de passe est : "+password+"\n"
+        msg+="Pour te connecter au site c'est ici : "+MA_URL_COMPLETE+"gestion_creneaux"
+        msg+="\n\nL'équipe SSA"
+        envoie_mail([mail],'Bienvenu au group staff SSA',msg)
+        return True, "compte "+login+" créé"
+    except:
+        return False,"Formulaire incorrect"
+
+def modifie_compte(request):
+    try:
+        pk=request.POST['mpk']
+        nom=request.POST['mnom']
+        prenom=request.POST['mprenom']
+        mail=request.POST['mmail']
+        telephone=request.POST['mtelephone']
+        user=User.objects.get(pk=pk)
+        if user.username=="admin":
+            return False,"Impossible de modifier le compte admin"
+        if ('gr_gestion' in request.POST or 'gr_admin' in request.POST ) and (request.POST['mconfirmation']!='CONFIRMATION'):
+            return False,"Pour modifier un compte gestion ou admin, il faut entre CONFIRMATION dans le champs de confirmation"
+        user.first_name=prenom
+        user.last_name=nom
+        user.email=mail
+        user.save()
+        utilisateur=Utilisateur.objects.get(user=user)
+        utilisateur.telephone=telephone
+        utilisateur.save()
+        if 'gr_staff' in request.POST and user not in groupe_staff.user_set.all():
+            groupe_staff.user_set.add(user)
+        if 'gr_staff' not in request.POST and user in groupe_staff.user_set.all():
+            groupe_staff.user_set.remove(user)       
+        if 'gr_gestion' in request.POST and user not in groupe_gestion_creneaux.user_set.all():
+            groupe_gestion_creneaux.user_set.add(user)
+        if 'gr_gestion' not in request.POST and user in groupe_gestion_creneaux.user_set.all():
+            groupe_gestion_creneaux.user_set.remove(user)   
+        if 'gr_admin' in request.POST and user not in groupe_gestion_generale.user_set.all():
+            groupe_gestion_generale.user_set.add(user)
+        if 'gr_admin' not in request.POST and user in groupe_gestion_generale.user_set.all():
+            groupe_gestion_generale.user_set.remove(user)   
+        return True, "compte "+user.username+" modifié"
+    except:
+        return False,"Formulaire incorrect"
+
+def recupere_comptes():
+    tous=User.objects.all().exclude(username='admin').order_by('username')
+    res={}
+    for x in tous:
+        gr=x.groups.all()
+        res[x.pk]={'login' : x.username,'prenom' : x.first_name,'nom' : x.last_name,
+        'mail' : x.email,"is_staff" : groupe_staff in gr,
+        "is_gestion" : groupe_gestion_creneaux in gr,
+        'is_admin' : groupe_gestion_generale in gr}
+    tous=Utilisateur.objects.all()
+    for x in tous:
+        if x.user.pk in res:
+            res[x.user.pk]['telephone']=x.telephone
+    return res
+
+def recupere_txt_annonce():
+    try:
+        return Textes.objects.get(nom="annonce").contenu
+    except:
+        return ""
+
+def modifie_annonce(request):
+    if True:
+        annonce=Textes.objects.get(nom="annonce")
+        annonce.contenu=request.POST['annonce']
+        annonce.save()
+        return True,"annonce modifiée"
+    #except:
+        return False,"erreur dans la base de données !"
