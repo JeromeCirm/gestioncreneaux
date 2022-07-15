@@ -94,15 +94,29 @@ def validation_compte(request,login=None,lehash=None):
     return render(request,'base/validation_compte.html',context)
 
 def recuperation_password(request):
-    if request.metho=="POST":   
-        pass
     context={}
+    if request.method=="POST":   
+        context["msg"]=envoie_mail_recuperation_mot_de_passe(request)
     return render(request,'base/recuperation_password.html',context)
+
+def demande_reinitialisation(request,login=None,lehash=None):
+    if request.method=='POST':
+        print("here")
+        context={**reinitialise_mot_de_passe(request)}
+    elif login==None:
+        context={ "msg" : "Le lien n'est pas valide"}
+    else:
+        context={ **verifie_lien_reinitialisation(login,lehash)}
+    return render(request,'base/demande_reinitialisation.html',context)
 
 # pages générales si connecté
 @auth()
 def reglages(request):
     context={"menu" : menu_general(request)}
+    if request.method=="POST":
+        if 'action' in request.POST:
+            if request.POST['action']=='change password':
+                context["msg"]=change_mot_de_passe(request)
     return render(request,'base/reglages.html',context)
 
 # pages accessibles au staff

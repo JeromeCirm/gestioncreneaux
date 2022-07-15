@@ -17,11 +17,21 @@ function jeu_libre_inscription() {
     avecinscription.checked=true
     aveccommentaire.checked=false
 }
+
 function cmb() {
     intitule.value="CMB "
     textebouton.value="Cliquer pour s'inscrire"
     avecinscription.checked=true
     aveccommentaire.checked=false
+}
+
+/* met à jour le texte par défaut du bouton quand on change le champ inscription*/
+function MajInscription() {
+    if (avecinscription.checked) {
+        textebouton.value="Cliquer pour s'inscrire"
+    } else {
+        textebouton.value="Accès libre"
+    }
 }
 
 /* sans doute le plus courant */

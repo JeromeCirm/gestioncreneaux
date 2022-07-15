@@ -2,5 +2,27 @@
 
 {% block body %}
 {% include 'menu.html'%}
-Bientôt disponible : changement de mot de passe, gestion des mails reçus, etc..
+<BR> {% if msg %} <span class="cred">{{ msg }} </span> <BR><BR> {% endif %}
+<fieldset class="formulaire">
+    <legend>Formulaire pour changer de mot de passe</legend>
+    <form method="POST" action="">
+        {% csrf_token %}
+        <div class="item_formulaire">
+            <label for="password">Ancien mot de passe : </label>
+            <input type="password" name="password" maxlength="100" required id="password">
+        </div> 
+        <div class="item_formulaire">
+            <label for="newpassword">Nouveau mot de passe : </label>
+            <input type="password" name="newpassword" maxlength="100" required id="newpassword">
+        </div> 
+        <div class="item_formulaire">
+            <label for="newpassword_confirm">Nouveau mot de passe (confirmation) : </label>
+            <input type="password" name="newpassword_confirm" maxlength="100" required id="newpassword_confirm">
+        </div> 
+        <input type="hidden" name="action" value="change password">
+        <input type="submit" value="Valider le changement de mot de passe"/>
+    </form>
+</fieldset>
+<BR>
+
 {% endblock body %}

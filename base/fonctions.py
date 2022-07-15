@@ -1,7 +1,9 @@
 import datetime
 import locale
 from re import U
+from this import d
 from django.contrib.auth.models import Group
+from django.contrib.auth import authenticate,login
 from .models import *
 from .config import *
 
@@ -194,7 +196,6 @@ def click_creneau(request):
 def supprime_creneau(post):
     try:
         if post['avecclick']=="false":
-            print('initilisation')
             return
         id=int(post['id'])
         creneau=Creneaux.objects.get(pk=id)
@@ -395,10 +396,86 @@ def recupere_txt_annonce():
         return ""
 
 def modifie_annonce(request):
-    if True:
+    try:
         annonce=Textes.objects.get(nom="annonce")
         annonce.contenu=request.POST['annonce']
         annonce.save()
         return True,"annonce modifiée"
-    #except:
+    except:
         return False,"erreur dans la base de données !"
+
+def change_mot_de_passe(request):
+    try:
+        password=request.POST['password']
+        newpassword=request.POST['newpassword']
+        newpassword_confirm=request.POST['newpassword_confirm']
+        user=authenticate(request,username=request.user.username,password=password)    
+        if (newpassword!=newpassword_confirm):
+            return "le nouveau mot de passe est mal écrit"
+        if user is not None:
+            user=User.objects.get(username=request.user.username)
+            user.set_password(newpassword)
+            user.save()
+            login(request,user)
+            return "changement de mot de passe effectué"
+        return "le mot de passe est incorrect"
+    except:
+        return "erreur dans le formulaire"
+
+def envoie_mail_recuperation_mot_de_passe(request):
+    msg="Si le login et le mail correspondent à un compte existant, un mail a été envoyé pour réinitialiser le mot de passe."
+    try:
+        login=request.POST['login']
+        mail=request.POST['mail']
+        user=User.objects.get(username=login,email=mail)
+        lehash=hash()
+        utilisateur=Utilisateur.objects.get(user=user)
+        utilisateur.csrf_token=lehash
+        utilisateur.date=datetime.datetime.now()
+        utilisateur.reinitialisation_password=True
+        utilisateur.save()
+        msg_mail="Bonjour "+user.first_name+",\n\n"
+        msg_mail+="Une demande de réinitialisation de mail vient d'être envoyé pour ton compte SSA\n"
+        msg_mail+="clique sur ce lien pour changer de mot de passe : "
+        msg_mail+=MA_URL_COMPLETE+"demande_reinitialisation/"+login+"/"+lehash
+        msg_mail+="\n\nL'équipe SSA"
+        envoie_mail([mail],'Demande de récupération de compte SSA',msg_mail)
+        return msg
+    except:
+        return msg
+
+# vérifie si la demande de récupération de mail est légitime
+# renvoie un dictionnaire de contexte pour le template
+# le champs autorise est mis à vrai si c'est bien autorisé
+# le message d'erreu est alors dans msg
+def verifie_lien_reinitialisation(login,lehash):
+    try:
+        user=User.objects.get(username=login)
+        utilisateur=Utilisateur.objects.get(user=user,csrf_token=lehash)
+        if not utilisateur.reinitialisation_password:
+            return {"autorise" : False, "msg":"le lien est invalide"}
+        if utilisateur.date_demande+datetime.timedelta(days=7)<datetime.date.today():
+            return {"autorise" : False, "msg":"le lien a expiré"}
+        return {"autorise" : True, "login" : login,"hash" : lehash}
+    except:
+        return {"autorise" : False, "msg":"le lien est invalide"}
+
+def reinitialise_mot_de_passe(request):
+    try:
+        username=request.POST['login']
+        lehash=request.POST['hash']
+        newpassword=request.POST['password']
+        user=User.objects.get(username=username)
+        utilisateur=Utilisateur.objects.get(user=user,csrf_token=lehash)
+        if not utilisateur.reinitialisation_password:
+            return {"autorise" : False, "msg":"le lien est invalide"}
+        if utilisateur.date_demande+datetime.timedelta(days=7)<datetime.date.today():
+            return {"autorise" : False, "msg":"le lien a expiré"}
+        user.set_password(newpassword)
+        user.save()
+        login(request,user)                
+        utilisateur.reinitialisation_password=False
+        utilisateur.save()
+        return {"autorise" : False, "msg" : "le mot de passe a été correctement modifié"}
+    except:
+        return {"autorise" : False, "msg":"le lien est invalide"}

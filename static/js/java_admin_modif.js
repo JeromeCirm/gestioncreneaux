@@ -81,7 +81,7 @@ function affiche_creneau(creneaux) {
         var child=document.createElement('div')
         child.setAttribute('class','item_formulaire center')
         var label=document.createElement('label')
-        label.innerHTML="intitulé : "
+        label.innerHTML="horaire/intitulé : "
         child.appendChild(label)
         var intitule=document.createElement('input')
         intitule.value=creneau["intitulé"]
