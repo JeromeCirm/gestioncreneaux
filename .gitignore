@@ -1,4 +1,10 @@
 base/config.py
 db.sqlite3
-__pycache_/*
-base/__pycache__/*
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+
+# Django stuff
+*.log
+*.pot
