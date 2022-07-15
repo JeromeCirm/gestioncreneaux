@@ -1,3 +1,4 @@
 base/config.py
 db.sqlite3
 __pycache_/*
+base/__pycache__/*
