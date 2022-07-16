@@ -14,7 +14,7 @@ groupe_gestion_generale=Group.objects.get(name="gestion_generale")
 groupe_gestion_creneaux=Group.objects.get(name="gestion_creneaux")
 
 #fonctions générales
-locale.setlocale(locale.LC_ALL,'french')
+locale.setlocale(category=locale.LC_ALL,locale='fr_FR.UTF-8')
 def jolie_date(date):
     return date.strftime('%A %e %B')
 
@@ -422,12 +422,17 @@ def change_mot_de_passe(request):
     except:
         return "erreur dans le formulaire"
 
+# action refusée pour admin ou compte gestion generale
 def envoie_mail_recuperation_mot_de_passe(request):
     msg="Si le login et le mail correspondent à un compte existant, un mail a été envoyé pour réinitialiser le mot de passe."
     try:
         login=request.POST['login']
         mail=request.POST['mail']
+        if login=="admin":
+            return msg
         user=User.objects.get(username=login,email=mail)
+        if groupe_gestion_generale in user.groups.all():
+            return msg
         lehash=hash()
         utilisateur=Utilisateur.objects.get(user=user)
         utilisateur.csrf_token=lehash
@@ -460,12 +465,17 @@ def verifie_lien_reinitialisation(login,lehash):
     except:
         return {"autorise" : False, "msg":"le lien est invalide"}
 
+# réinitialisation interdite pour admin et groupe gestion générale
 def reinitialise_mot_de_passe(request):
     try:
         username=request.POST['login']
         lehash=request.POST['hash']
         newpassword=request.POST['password']
+        if username=="admin":
+            return {"autorise" : False, "msg" : "action impossible"}
         user=User.objects.get(username=username)
+        if groupe_gestion_generale in user.groups.all():
+            return {"autorise" : False, "msg" : "action impossible"}
         utilisateur=Utilisateur.objects.get(user=user,csrf_token=lehash)
         if not utilisateur.reinitialisation_password:
             return {"autorise" : False, "msg":"le lien est invalide"}
