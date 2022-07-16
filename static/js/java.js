@@ -14,14 +14,14 @@ function click_staff(id,avecclick=true) {
   	  body: formData
 	}).then(function(res){ return res.json();})
 	  .then(function(res){
-        affiche_creneau_staff(res["creneaux"],res["inscription"])
+        affiche_creneau_staff(res["creneaux"],res["inscription"],id,avecclick)
  	  })
   	  .catch(function(err){ console.log('Erreur requête', err);});
 }
 
 /* insère les créneaux dans la DOM avec le style approprié au statut 
 partie gestion staff */
-function affiche_creneau_staff(creneaux,inscription) {
+function affiche_creneau_staff(creneaux,inscription,id,avecclick) {
     var divCreneaux=document.getElementById('creneaux_staff')
     divCreneaux.innerHTML="";
     for (var tmp in creneaux) {
@@ -50,6 +50,9 @@ function affiche_creneau_staff(creneaux,inscription) {
         } else {
             label.innerHTML="Absent(e)"
             label.setAttribute('class','round blue cwhite pointer')
+            if ((inter==id) && (avecclick) && creneau.staff==0) {
+                alert("Attention, tu étais la seule personne du staff sur ce créneau. Pense à prévenir les autres personnes sur le groupe WhatsApp !")
+            }
         }
         noeud.appendChild(label)
         divCreneaux.appendChild(noeud)
