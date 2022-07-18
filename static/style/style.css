@@ -50,18 +50,25 @@ nav.menu {
 }
 
 .menu ul {
-  display: flex;
   list-style: none;
   padding : 0px;
-  padding-top: 5px;;
+  padding-top: 5px;
+  padding-bottom : 5px;
   margin : 0px;
-  margin-top: 5px;;
+  margin-top: 5px;
+  margin-bottom : 5px;
 }
 
+.menuli {
+  /*padding: -5px -10px;*/
+  line-height: 1.5em;
+  margin-left : 5px;
+  margin-right : 5px;
+  border-right: 2px solid black;
+}
 .menu li {
-  padding: 5px 10px;
+  display : inline;
 }
-
 .menu li a {
   color: white;
   text-decoration: none;
@@ -95,6 +102,7 @@ div.creneaux_staff {
 }
 
 label.round {  /* les labels des checkbox/radios */
+  display : inline-block;
   border : 1px solid black;
   padding : 5px 10px;
   margin : 5px;
@@ -125,7 +133,7 @@ div.modif {
 }
 
 /* style page de connexion */
-:root {
+/*:root {
   --color-main: #71c6dd;
   --color-main-light: #e1f6fb;
   --color-dark: #3f4156;
@@ -137,7 +145,7 @@ div.modif {
   --color-bg: #2d2d39;
   --color-success: #5dd693;
   --color-error: #fc4b0b;
-}
+}*/
 
 .layout__box {
   width: 90%;
@@ -205,11 +213,11 @@ div.modif {
 
 .form__group input {
   background: transparent;
-  border: 1px solid var(--color-dark-light);
+  border: 1px solid #696d97;
   padding: 1rem;
   border-radius: 3px;
   width: 100%;
-  color: var(--color-dark);
+  color: #3f4156;
   font-weight: 500;
   outline: none;
   font-size: 1.5em;
