@@ -18,24 +18,51 @@ locale.setlocale(category=locale.LC_ALL,locale='fr_FR.UTF-8')
 def jolie_date(date):
     return date.strftime('%A %e %B')
 
-#fonctions définissant les menus selon le groupe de l'utilisateur
+#fonctions définissant les menus selon le groupe de l'utilisateur : 
+def menu(request):
+    liste_menu=[
+        ["creneaux","jeu libre"],
+    ]
+    if request.user.is_authenticated:
+        lesgroupes=request.user.groups.all()
+        if groupe_staff in lesgroupes:
+            liste_menu+=[
+                ["gestion_creneaux","gestion creneaux"],
+                ["recapitulatif","recapitulatif"],
+            ]
+        if groupe_gestion_creneaux in lesgroupes:
+            liste_menu+=[
+                ["creation_creneaux","creation creneaux"],
+                ["modif_creneaux","modif creneaux"]
+            ]
+        if groupe_gestion_generale in lesgroupes:
+            liste_menu+=[
+                ["gestion_generale","gestion generale"],
+                #["initialisation","initialisation"],
+            ]
+    else:
+        liste_menu.append(["connexion","Connexion"])
+    return liste_menu
+
 def menu_general(request):
-    menu=[
+    return menu(request)
+    mmenu=[
         ["creneaux","Créneaux"],
         #["informations","Infos"],
     ]
     if request.user.is_authenticated:
         lesgroupes=request.user.groups.all()
         if groupe_staff in lesgroupes:
-            menu.append(["gestion_creneaux","Menu Staff"])
+            mmenu.append(["gestion_creneaux","Menu Staff"])
         if groupe_gestion_creneaux in lesgroupes:
-            menu.append(["creation_creneaux","Menu Admin"])    
+            mmenu.append(["creation_creneaux","Menu Admin"])    
     else:
-        menu.append(["connexion","Connexion"])
-    return menu
+        mmenu.append(["connexion","Connexion"])
+    return mmenu
 
 def menu_staff(request):
-    menu=[
+    return menu(request)
+    mmenu=[
         ["creneaux","jeu libre"],
         ["gestion_creneaux","gestion creneaux"],
         ["recapitulatif","recapitulatif"],
@@ -44,11 +71,12 @@ def menu_staff(request):
     ]
     lesgroupes=request.user.groups.all()
     if groupe_gestion_creneaux in lesgroupes:
-        menu.append(["creation_creneaux","Menu Admin"])     
-    return menu
+        mmenu.append(["creation_creneaux","Menu Admin"])     
+    return mmenu
 
 def menu_gestion(request):
-    menu=[
+    return menu(request)
+    mmenu=[
         ["creneaux","jeu libre"],
         ["gestion_creneaux","Menu Staff"],
         ["creation_creneaux","creation creneaux"],
@@ -56,7 +84,7 @@ def menu_gestion(request):
         ["gestion_generale","gestion generale"],
         ["initialisation","initialisation"],
     ]
-    return menu
+    return mmenu
 
 # récupère les créneaux existants et autorisés pour les groupes de l'utilisateur
 # tous pour ne pas tenir compte du groupe de l'utilisateur

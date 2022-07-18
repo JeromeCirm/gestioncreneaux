@@ -2,6 +2,8 @@ from django.shortcuts import render,redirect
 from django.contrib.auth import logout,authenticate, login
 from django.http import HttpResponse
 import json
+
+from gestioncreneaux.settings import SECURE_SSL_REDIRECT
 from .fonctions import *
 from .forms import *
 
@@ -11,6 +13,7 @@ from .forms import *
 # - réglage : afficher le bon menu et pas celui d'un simple utilisateur, si staff/admin? anecdotique
 # - si le statut du créneau change : inscription/non : supprimer les inscrits?
 # - nettoyer la base avec les comptes non validés au bout d'un moment?
+#  - enlever les fonctions menus en trop une fois que c'est bien géré
 # # !!!!!!!!!!!!!!!!!!!!!!
 
 # décorateur pour vérifier si le groupe de l'utilisateur est dans la liste
