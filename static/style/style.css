@@ -214,3 +214,22 @@ div.modif {
   outline: none;
   font-size: 1.5em;
 }
+
+.coordonneesstaff,.lesinscrits {
+  display : grid;
+  grid-template-columns : 1fr 1fr ;
+}
+
+.coordonneesstaff :nth-child(odd) {
+  text-align : right;
+  margin-right : 5px;
+}
+
+.lesinscrits :nth-child(odd) {
+  text-align : center;
+  margin-right : 5px;
+}
+.coordonneesstaff,.lesinscrits :nth-child(even) {
+  text-align : left;
+  margin-left : 5px;
+}

@@ -2,5 +2,9 @@
 
 {% block body %}
 {% include 'menu.html'%}
-Coordonnées
+<BR> Coordonnées du staff : <BR>
+
+<div class="coordonneesstaff">
+    {% for user in lestaff %} <div>{{ user.nom }}</div><div>{{ user.telephone }}</div> {% endfor %}
+</div>
 {% endblock body %}

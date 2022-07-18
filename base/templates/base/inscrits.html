@@ -2,5 +2,8 @@
 
 {% block body %}
 {% include 'menu.html'%}
-Inscrits
+<BR>Inscrits<BR> <BR>
+<div class="lesinscrits">
+    {% for item in inscriptions %} <div>{{ item.creneau }}</div> <div> {% for x in item.inscrits %} {{ x.user.first_name }} {{ x.user.last_name }}, {% endfor %}</div> {% endfor %}
+</div>
 {% endblock body %}

@@ -140,13 +140,8 @@ def recapitulatif(request):
     return render(request,'base/recapitulatif.html',context)
 
 @auth([groupe_staff])
-def inscrits(request):
-    context={"menu" : menu_staff(request)}
-    return render(request,'base/inscrits.html',context)
-
-@auth([groupe_staff])
 def coordonnees(request):
-    context={"menu" : menu_staff(request)}
+    context={"menu" : menu_staff(request),"lestaff" : recupere_coordonnees_staff()}
     return render(request,'base/coordonnees.html',context)
 
 #pages accessibles aux gestionnaires de créneaux
@@ -179,6 +174,11 @@ def modif_creneaux(request):
     context={"menu" : menu_gestion(request)}
     #context['creneaux']=recupere_creneaux(request,tous=True)
     return render(request,'base/modif_creneaux.html',context)
+
+@auth([groupe_gestion_creneaux])
+def inscrits(request):
+    context={"menu" : menu_staff(request), "inscriptions" : recupere_inscrits()}
+    return render(request,'base/inscrits.html',context)
 
 #pages accessibles aux gestionnaires avec tous les droits
 @auth([groupe_gestion_generale])

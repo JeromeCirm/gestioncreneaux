@@ -1,3 +1,14 @@
+/* Mise à jour du texte du bouton lors du changement de statut avec/Sans inscirption */
+function maj_bouton(id) {
+    var text_bouton=document.getElementById(id.toString()+'_text_bouton')
+    var avec_inscription=document.getElementById(id.toString()+'_avec_inscription')
+    if (avec_inscription.checked) {
+      text_bouton.value="Cliquer pour s'inscrire"
+    } else {
+      text_bouton.value="Accès libre"
+    }
+}
+
 /* appel de l'API pour gérer un click(éventuellement) et mettre 
 à jour les créneaux concernés */
 function modifie(id) {
@@ -109,6 +120,7 @@ function affiche_creneau(creneaux) {
         avec_inscription.setAttribute('type','checkbox')
         avec_inscription.checked=creneau["avec_inscription"]
         avec_inscription.setAttribute('id',lid+'avec_inscription')
+        avec_inscription.setAttribute('onchange','maj_bouton('+inter.toString()+')')
         child.appendChild(avec_inscription)
         noeud.appendChild(child)
 

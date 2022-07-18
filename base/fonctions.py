@@ -29,11 +29,13 @@ def menu(request):
             liste_menu+=[
                 ["gestion_creneaux","gestion creneaux"],
                 ["recapitulatif","recapitulatif"],
+                ["coordonnees","coordonnées staff"],
             ]
         if groupe_gestion_creneaux in lesgroupes:
             liste_menu+=[
                 ["creation_creneaux","creation creneaux"],
-                ["modif_creneaux","modif creneaux"]
+                ["modif_creneaux","modif creneaux"],
+                ["inscrits","inscrits"],
             ]
         if groupe_gestion_generale in lesgroupes:
             liste_menu+=[
@@ -222,13 +224,21 @@ def click_creneau(request):
 
 #partie gestion : modif/suppression d'un créneau 
 def supprime_creneau(post):
-    try:
+    if True: #try:
         if post['avecclick']=="false":
             return
         id=int(post['id'])
         creneau=Creneaux.objects.get(pk=id)
+        lesinscrits=Inscription.objects.filter(idcreneau=creneau)
+        liste_mail=[x.user.email for x in lesinscrits]
+        if liste_mail!=[]:
+            msg="Bonjour !\n\n"
+            msg+="Le créneau de "+jolie_date(creneau.date)+" "+creneau.intitulé+" ne peut être maintenu, nous devons le supprimer.\n"
+            msg+="A bientôt sur le sable,\n\n"
+            msg+="L'équipe SSA"
+            envoie_mail(liste_mail,"Annulation de créneau",msg)
         creneau.delete()
-    except:
+    #except:
         pass #ne doit pas arriver : formulaire incorrect
         # éventuellement possible si admin loggué deux fois
 
@@ -321,14 +331,17 @@ def envoie_mail(liste_destinataire,sujet,corps_mail):
     smtpserver.starttls(context=create_default_context())
     smtpserver.ehlo()
     smtpserver.login(user, password)
-    msg = EmailMessage()
-    msg.set_content(msg)
-    msg['From'] = user
-    msg['Subject'] = sujet
-    msg.set_content(corps_mail)
     for to in liste_destinataire:
-        msg['To'] = to
-        smtpserver.send_message(msg)
+        try:
+            msg = EmailMessage()
+            msg.set_content(msg)
+            msg['From'] = user
+            msg['Subject'] = sujet
+            msg.set_content(corps_mail)
+            msg['To'] = to
+            smtpserver.send_message(msg)
+        except:
+            pass
     smtpserver.close()
 
 # création d'un compte staff
@@ -517,3 +530,20 @@ def reinitialise_mot_de_passe(request):
         return {"autorise" : False, "msg" : "le mot de passe a été correctement modifié"}
     except:
         return {"autorise" : False, "msg":"le lien est invalide"}
+
+# noms et téléphones du staff
+def recupere_coordonnees_staff():
+    lestaff=groupe_staff.user_set.all()
+    res=[]
+    for user in lestaff:
+        res.append({"nom" : user.first_name+" "+user.last_name,"telephone" : user.utilisateur.telephone})
+    return res
+
+# liste des créneaux avec inscriptions et les personnes inscrites 
+def recupere_inscrits():
+    lescreneaux=Creneaux.objects.filter(avec_inscription=True,date__gte=datetime.datetime.now()).order_by('date')
+    res=[]
+    for uncreneau in lescreneaux:
+        lesinscrits=Inscription.objects.filter(idcreneau=uncreneau)
+        res.append({"creneau" : jolie_date(uncreneau.date),"inscrits" : lesinscrits})
+    return res
