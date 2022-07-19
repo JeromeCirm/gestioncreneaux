@@ -195,6 +195,8 @@ def gestion_generale(request):
                 res,err=modifie_compte(request)
             if request.POST['action']=='annonce':
                 res,err=modifie_annonce(request)
+            if request.POST['action']=='information':
+                res,err=modifie_information(request)
             if request.POST['action']=='delai':
                 res,err=modifie_delai(request)
     try:
@@ -202,7 +204,8 @@ def gestion_generale(request):
     except:
         delai=2
     context={"menu" : menu_gestion(request),"lescomptes" : recupere_comptes(),
-     "reussi" : res, "err" : err, "annonce" : recupere_txt_annonce(), "delai" : delai }
+     "reussi" : res, "err" : err, "annonce" : recupere_txt_annonce(), "delai" : delai,
+     "information" : recupere_txt_information() }
     return render(request,'base/gestion_generale.html',context)
 
 @auth([groupe_gestion_generale])

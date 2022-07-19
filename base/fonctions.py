@@ -162,7 +162,6 @@ def recupere_information(request):
     try:
         if request.user.is_authenticated:
             if not request.user.utilisateur.information:
-                print("non demandée")
                 return False
         information=Textes.objects.get(nom="information")
         return (information.contenu).split('\n')
@@ -431,12 +430,27 @@ def recupere_txt_annonce():
     except:
         return ""
 
+def recupere_txt_information():
+    try:
+        return Textes.objects.get(nom="information").contenu
+    except:
+        return ""
+
 def modifie_annonce(request):
     try:
         annonce=Textes.objects.get(nom="annonce")
         annonce.contenu=request.POST['annonce']
         annonce.save()
         return True,"annonce modifiée"
+    except:
+        return False,"erreur dans la base de données !"
+
+def modifie_information(request):
+    try:
+        information=Textes.objects.get(nom="information")
+        information.contenu=request.POST['information']
+        information.save()
+        return True,"information modifiée"
     except:
         return False,"erreur dans la base de données !"
 

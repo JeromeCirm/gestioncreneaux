@@ -84,6 +84,17 @@
     <div>
         <form method="post" action="">
             {% csrf_token %}
+            <legend>Informations de la page d'accueil :</legend>
+            <textarea class="annonce" style="width : 80%;" rows=10 name="information">{{ information }}
+            </textarea>
+            <input type="hidden" name="action" value="information" /><BR><BR>
+            <input class="bouton" type="submit" value="Mettre à jour le texte d'informations">
+           </form>
+    </div><BR><BR>
+    
+    <div>
+        <form method="post" action="">
+            {% csrf_token %}
             <legend>Gestion des créneaux sans staff :</legend>
             <label for="delai">Mettre en rouge s'il n'y a pas de staff pour gérer </label>        
             <input id="delai" name="delai" size="2" value="{{ delai }}"/>  jours avant le créneau          
