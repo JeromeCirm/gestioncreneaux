@@ -40,7 +40,7 @@ def menu(request):
         if groupe_gestion_generale in lesgroupes:
             liste_menu+=[
                 ["gestion_generale","gestion generale"],
-                #["initialisation","initialisation"],
+                ["initialisation","initialisation"],
             ]
     else:
         liste_menu.append(["connexion","Connexion"])
@@ -114,11 +114,18 @@ def json_creneaux(request,tous=False,joli=True):
             if x.idcreneau.pk==pk:
                 val+=1
         return val
+    try:
+        delai=int(Textes.objects.get(nom="delai").contenu)
+        if delai<0 or delai>7:
+            delai=2
+    except:
+        delai=2
+    date_limite=datetime.date.today()+datetime.timedelta(days=delai)
     creneaux=recupere_creneaux(request,tous)
     inscrits=Inscription.objects.filter(statut="inscrit")
     res=[ {"pk" : x.pk,"date": jolie_date(x.date) if joli else str(x.date),"intitulé" : x.intitulé,"text_bouton" : x.text_bouton,
     "avec_inscription" : x.avec_inscription,"avec_commentaire" : x.avec_commentaire,
-    "staff" : x.staff,"nbinscrits" : aux(x.pk)} for x in creneaux]
+    "staff" : x.staff,"nbinscrits" : aux(x.pk), "soon" : x.date<date_limite} for x in creneaux]
     return res
 
 # json de la liste des inscriptions de l'utilisateur
@@ -151,17 +158,23 @@ def creneau_et_staff():
     return res
 
 # fonctions pour récupérer les textes d'annonce
-def recupere_information():
+def recupere_information(request):
     try:
-        return Textes.objects.get(nom="information")
+        if request.user.is_authenticated:
+            if not request.user.utilisateur.information:
+                print("non demandée")
+                return False
+        information=Textes.objects.get(nom="information")
+        return (information.contenu).split('\n')
     except:
-        return "" # si la base de données est corrompue, ne doit pas arriver
+        return False # si la base de données est corrompue, ne doit pas arriver
 
 def recupere_annonce():
     try:
-        return Textes.objects.get(nom="annonce")
+        annonce=Textes.objects.get(nom="annonce")
+        return (annonce.contenu).split('\n')
     except:
-        return "" # si la base de données est corrompue, ne doit pas arriver
+        return [] # si la base de données est corrompue, ne doit pas arriver
 
 # traitement click sur un créneau pour le staff
 def click_staff(request):
@@ -320,35 +333,17 @@ def verifie_lien_validation(login,lehash):
         return "le lien est invalide"
 
 # fonction d'envoi de mail
-import smtplib
-from email.message import EmailMessage
-from ssl import create_default_context
+from django.core.mail import send_mail
+from gestioncreneaux.settings import EMAIL_HOST_USER
 
-def envoie_mail(liste_destinataire,sujet,corps_mail):
-    smtpserver = smtplib.SMTP(ENVOIE_MAIL_HOST,ENVOIE_MAIL_PORT)
-    user = ENVOIE_MAIL_USER
-    password = ENVOIE_MAIL_PASSWORD
-    smtpserver.starttls(context=create_default_context())
-    smtpserver.ehlo()
-    smtpserver.login(user, password)
-    for to in liste_destinataire:
-        try:
-            msg = EmailMessage()
-            msg.set_content(msg)
-            msg['From'] = user
-            msg['Subject'] = sujet
-            msg.set_content(corps_mail)
-            msg['To'] = to
-            smtpserver.send_message(msg)
-        except:
-            pass
-    smtpserver.close()
+def envoie_mail(liste_destinataire,sujet,corps_mail): 
+    send_mail(subject=sujet,message=corps_mail,from_email=EMAIL_HOST_USER,recipient_list=liste_destinataire)
 
 # création d'un compte staff
 # vérifie que le login est dispo. 
 # à faire : Si non, propose d'ajouter au groupe staff la personne
 def ajout_compte(request):
-    try:
+    if True:#try:
         login=request.POST['login']
         nom=request.POST['nom']
         prenom=request.POST['prenom']
@@ -377,7 +372,7 @@ def ajout_compte(request):
         msg+="\n\nL'équipe SSA"
         envoie_mail([mail],'Bienvenu au group staff SSA',msg)
         return True, "compte "+login+" créé"
-    except:
+    #except:
         return False,"Formulaire incorrect"
 
 def modifie_compte(request):
@@ -547,3 +542,38 @@ def recupere_inscrits():
         lesinscrits=Inscription.objects.filter(idcreneau=uncreneau)
         res.append({"creneau" : jolie_date(uncreneau.date),"inscrits" : lesinscrits})
     return res
+
+# modifie le nombre de jours à partir duquel un créneau n'est pas indiqué en rouge sans staff
+def modifie_delai(request):
+    try:
+        delai=int(request.POST['delai'])
+        if delai<0 or delai>7:
+            delai=2
+        txt=Textes.objects.get(nom="delai")
+        txt.contenu=delai
+        txt.save()
+        return True,"La durée a été mise à jour pour la gestion des créneaux sans staff"
+    except:
+        return False,"Erreur lors de la modification du de la gestion des créneaux sans staff"
+
+# récupère les réglages d'un compte et les mets dans context
+def recupere_reglages(request,context):
+    try:
+        context["information"]=request.user.utilisateur.information
+    except:
+        pass
+
+def change_reglages(request):
+    try:
+        if "information" in request.POST:
+            request.user.utilisateur.information=True
+        else:
+            request.user.utilisateur.information=False
+        request.user.utilisateur.save()
+        return "Les modifications des réglages ont été enregistrées."
+    except:
+        return "Erreur lors du changement des réglages"
+
+
+
+

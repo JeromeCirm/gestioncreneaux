@@ -3,7 +3,8 @@
 {% block body %}
 {% csrf_token %}
 {% include 'menu.html'%}
-{% if annonce != "" %} <BR>{{ annonce.contenu }} <BR><BR>{% endif %}
+<BR> {% for line in annonce %} <p>{{ line }}</p>{% endfor %}
+{% if information %} {% for line in information %} <p>{{ line }}</p>{% endfor %} {% endif %}<BR>
 
 <fieldset>
     <legend>Liste des créneaux disponibles : (créneaux sélectionnés en orange)</legend>

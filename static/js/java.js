@@ -97,7 +97,11 @@ function affiche_creneau_general(creneaux,inscription) {
         divCreneaux.appendChild(noeud)
         var noeud=document.createElement('div')
         var label=document.createElement('label')
-        if (creneau.avec_inscription) {
+        if (creneau.soon && creneau.staff == 0) {
+            label.innerHTML="Créneau en attente"
+            label.setAttribute('class','round red')
+            noeud.appendChild(label)
+        } else if (creneau.avec_inscription) {
             label.setAttribute('onclick','click_creneau('+inter.toString()+')')
             if (inter in inscription) {
                 label.innerHTML="Inscrit(e) !"

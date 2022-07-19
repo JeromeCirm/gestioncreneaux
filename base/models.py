@@ -9,6 +9,7 @@ class Utilisateur(models.Model):
     csrf_token=models.TextField(null=True)
     en_attente_confirmation=models.BooleanField(default=True) # lien envoyé et non validé par mail
     reinitialisation_password=models.BooleanField(default=False)
+    information=models.BooleanField(default=True)
 
 class Creneaux(models.Model):
     date=models.DateField()

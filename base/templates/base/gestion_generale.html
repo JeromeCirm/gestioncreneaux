@@ -81,6 +81,17 @@
        </form>
 </div><BR><BR>
 
+    <div>
+        <form method="post" action="">
+            {% csrf_token %}
+            <legend>Gestion des créneaux sans staff :</legend>
+            <label for="delai">Mettre en rouge s'il n'y a pas de staff pour gérer </label>        
+            <input id="delai" name="delai" size="2" value="{{ delai }}"/>  jours avant le créneau          
+            <input type="hidden" name="action" value="delai" />
+            <input class="bouton" type="submit" value="Mettre à jour la durée">
+           </form>
+    </div>
+
 <script src="{% static 'js/java_admin_generale.js' %}" ></script>
 <script>
     lescomptes={ {% for key,value in lescomptes.items %} "{{ key }}" : { "login" : "{{ value.login }}","prenom" : "{{ value.prenom }}","nom" : "{{ value.nom }}","mail" : "{{ value.mail }}","telephone" : "{{ value.telephone }}","is_staff" : "{{ value.is_staff }}","is_gestion" : "{{ value.is_gestion}}","is_admin" : "{{ value.is_admin }}"}, {% endfor %}}

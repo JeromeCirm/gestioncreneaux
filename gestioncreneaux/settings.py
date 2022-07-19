@@ -129,3 +129,10 @@ STATIC_ROOT = MON_STATIC_ROOT
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# EMAIL SETTINGS 
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = MY_EMAIL_HOST_USER
+EMAIL_HOST_PASSWORD = MY_EMAIL_HOST_PASSWORD
+EMAIL_HOST = MY_EMAIL_HOST
+EMAIL_PORT = MY_EMAIL_PORT

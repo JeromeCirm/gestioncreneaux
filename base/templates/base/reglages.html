@@ -25,4 +25,17 @@
 </fieldset>
 <BR>
 
+    <fieldset class="formulaire">
+        <legend>Réglages spécifiques à ce compte</legend>
+        <form method="POST" action="">
+            {% csrf_token %}
+            <div class="item_formulaire">
+                <label for="information">Afficher les informations sur la page des créneaux jeu libre ? </label>
+                <input type="checkbox" name="information" id="information" {% if information %} checked {% endif %}>
+            </div> 
+            <input type="hidden" name="action" value="reglages">
+            <input type="submit" value="Valider les changements des réglages"/>
+        </form>
+    </fieldset>
+
 {% endblock body %}

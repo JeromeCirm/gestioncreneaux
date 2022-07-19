@@ -48,7 +48,7 @@ def creneaux(request):
         return HttpResponse(json.dumps(response_data), content_type="application/json")
     context={"menu" : menu_general(request)}
     context["annonce"]=recupere_annonce()
-    context["information"]=recupere_information()
+    context["information"]=recupere_information(request)
     return render(request,'base/creneaux.html',context)
 
 def informations(request):
@@ -120,6 +120,9 @@ def reglages(request):
         if 'action' in request.POST:
             if request.POST['action']=='change password':
                 context["msg"]=change_mot_de_passe(request)
+            if request.POST['action']=='reglages':
+                context["msg"]=change_reglages(request)
+    recupere_reglages(request,context)
     return render(request,'base/reglages.html',context)
 
 # pages accessibles au staff
@@ -192,11 +195,18 @@ def gestion_generale(request):
                 res,err=modifie_compte(request)
             if request.POST['action']=='annonce':
                 res,err=modifie_annonce(request)
+            if request.POST['action']=='delai':
+                res,err=modifie_delai(request)
+    try:
+        delai=int(Textes.objects.get(nom="delai").contenu)
+    except:
+        delai=2
     context={"menu" : menu_gestion(request),"lescomptes" : recupere_comptes(),
-     "reussi" : res, "err" : err, "annonce" : recupere_txt_annonce() }
+     "reussi" : res, "err" : err, "annonce" : recupere_txt_annonce(), "delai" : delai }
     return render(request,'base/gestion_generale.html',context)
 
 @auth([groupe_gestion_generale])
 def initialisation(request):
     context={"menu" : menu_gestion(request)}
+    envoie_mail_bis(['jerome.99@hotmail.fr'],"bienvenu à SSA","Bonjour\n\nCeci est un premier mail pour tester TLS\n\n Jerome")
     return render(request,'base/initialisation.html',context)
