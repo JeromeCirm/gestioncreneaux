@@ -30,6 +30,22 @@
         <form method="POST" action="">
             {% csrf_token %}
             <div class="item_formulaire">
+                <label for="prenom">Prénom/surnom : </label>
+                <input type="text" name="prenom" maxlength="100" required id="prenom" value="{{ prenom }}">
+            </div> 
+            <div class="item_formulaire">
+                <label for="nom">Nom (facultatif): </label>
+                <input type="text" name="nom" maxlength="100" id="nom" value="{{ nom }}">
+            </div> 
+            <div class="item_formulaire">
+                <label for="mail">Adresse mail : </label>
+                <input type="email" name="mail" maxlength="100"  id="mail" required value="{{ mail }}">
+            </div> 
+            <div class="item_formulaire">
+                <label for="telephone">Téléphone (facultatif) : </label>
+                <input type="txt" name="telephone" maxlength="100"  id="telephone" value="{{ telephone }}">
+            </div> 
+            <div class="item_formulaire">
                 <label for="information">Afficher les informations sur la page des créneaux jeu libre ? </label>
                 <input type="checkbox" name="information" id="information" {% if information %} checked {% endif %}>
             </div> 

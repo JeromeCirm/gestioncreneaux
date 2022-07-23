@@ -116,7 +116,7 @@ function affiche_creneau_general(creneaux,inscription) {
             noeud.appendChild(nb)
         } else {
             label.innerHTML=creneau.text_bouton
-            label.setAttribute('class','round green')
+            label.setAttribute('class','roundlibre')
             noeud.appendChild(label)
         }
         divCreneaux.appendChild(noeud)

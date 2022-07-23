@@ -290,6 +290,7 @@ def demande_creation_compte(request):
         prenom=request.POST['prenom']
         nom=request.POST['nom']
         mail=request.POST['mail']
+        telephone=request.POST['telephone']
         password=request.POST['password']
         password_verif=request.POST['password_verif']
         if password!=password_verif:
@@ -304,16 +305,19 @@ def demande_creation_compte(request):
             return False,"ce login n'est pas disponible"
     except:        
         return False,"Le formulaire est incomplet."
-    new_user=User.objects.create_user(username=login,first_name=prenom,last_name=nom,email=mail,password=password)
-    new_user.save()
-    le_hash=hash()
-    new_utilisateur=Utilisateur(user=new_user,telephone="",csrf_token=le_hash,date_demande=datetime.datetime.now())
-    new_utilisateur.save()
-    msg="Bonjour "+prenom+",\n\nVoici le lien pour activer le compte sur le site SSA (valable 7 jours): \n" 
-    msg+=MA_URL_COMPLETE+"validation_compte/"+login+"/"+le_hash
-    msg+="\n\nL'équipe SSA"    
-    envoie_mail([mail],'inscription site SSA',msg)
-    return True,"reussi"
+    try:
+        new_user=User.objects.create_user(username=login,first_name=prenom,last_name=nom,email=mail,password=password)
+        new_user.save()
+        le_hash=hash()
+        new_utilisateur=Utilisateur(user=new_user,telephone=telephone,csrf_token=le_hash,date_demande=datetime.datetime.now())
+        new_utilisateur.save()
+        msg="Bonjour "+prenom+",\n\nVoici le lien pour activer le compte sur le site SSA (valable 7 jours): \n" 
+        msg+=MA_URL_COMPLETE+"validation_compte/"+login+"/"+le_hash
+        msg+="\n\nL'équipe SSA"    
+        envoie_mail([mail],'inscription site SSA',msg)
+        return True,"reussi"
+    except:
+        return False,"erreur lors de la création de compte"
 
 # vérifie si on peut activer le compte login.
 # renvoi "reussi" si c'est bon et un message d'erreur sinon
@@ -574,6 +578,10 @@ def modifie_delai(request):
 def recupere_reglages(request,context):
     try:
         context["information"]=request.user.utilisateur.information
+        context["telephone"]=request.user.utilisateur.telephone
+        context["nom"]=request.user.last_name
+        context["prenom"]=request.user.first_name
+        context["mail"]=request.user.email
     except:
         pass
 
@@ -583,7 +591,12 @@ def change_reglages(request):
             request.user.utilisateur.information=True
         else:
             request.user.utilisateur.information=False
+        request.user.utilisateur.telephone=request.POST['telephone']
+        request.user.email=request.POST['mail']
+        request.user.first_name=request.POST['prenom']
+        request.user.last_name=request.POST['nom']
         request.user.utilisateur.save()
+        request.user.save()
         return "Les modifications des réglages ont été enregistrées."
     except:
         return "Erreur lors du changement des réglages"
