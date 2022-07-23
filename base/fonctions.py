@@ -149,10 +149,10 @@ def creneau_et_staff():
     "present" : [],"sibesoin" : []} for x in creneaux}
     for x in present:
         if x.idcreneau.pk in res:
-            res[x.idcreneau.pk]["present"].append(x.user.username)
+            res[x.idcreneau.pk]["present"].append(x.user.first_name+" "+x.user.last_name)
     for x in sibesoin:
         if x.idcreneau.pk in res:
-            res[x.idcreneau.pk]["sibesoin"].append(x.user.username)
+            res[x.idcreneau.pk]["sibesoin"].append(x.user.first_name+" "+x.user.last_name)
     for x in res:
         res[x]["nb"]=len(res[x]["present"])
     return res
