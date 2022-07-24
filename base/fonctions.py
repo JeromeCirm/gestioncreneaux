@@ -102,11 +102,19 @@ def recupere_creneaux(request,tous=False):
         creneaux=Creneaux.objects.filter(date__gte=datetime.datetime.now(),autorisation__groupe__in=lesgroupes).order_by('date')
     return creneaux
 
+# transforme les dates en date fr lisibles avec jour
+def joli_date_creneaux(creneaux):
+    res=[ {"pk" : x.pk,"date": jolie_date(x.date) ,"intitulé" : x.intitulé,"text_bouton" : x.text_bouton,
+    "avec_inscription" : x.avec_inscription,"avec_commentaire" : x.avec_commentaire,
+    "staff" : x.staff} for x in creneaux]
+    return res
+
 # récupère les créneaux existants et autorisés pour les groupes de l'utilisateur
 # en renvoyant un dictionnaire pour json
 # joli=True pour transformer les dates en format français lisible
 # on veux garder l'ordre et json réordonne par les clefs donc attention
 # d'où une liste et non un dictionnaire
+# ajout après coup : rajoute un champ jolidate quoiqu'il arrive
 def json_creneaux(request,tous=False,joli=True):
     def aux(pk): # compte le nb d'inscrits du créneau pk
         val=0
@@ -125,7 +133,8 @@ def json_creneaux(request,tous=False,joli=True):
     inscrits=Inscription.objects.filter(statut="inscrit")
     res=[ {"pk" : x.pk,"date": jolie_date(x.date) if joli else str(x.date),"intitulé" : x.intitulé,"text_bouton" : x.text_bouton,
     "avec_inscription" : x.avec_inscription,"avec_commentaire" : x.avec_commentaire,
-    "staff" : x.staff,"nbinscrits" : aux(x.pk), "soon" : x.date<date_limite} for x in creneaux]
+    "staff" : x.staff,"nbinscrits" : aux(x.pk), "soon" : x.date<date_limite,
+    "joliedate" : jolie_date(x.date) } for x in creneaux]
     return res
 
 # json de la liste des inscriptions de l'utilisateur
@@ -284,7 +293,13 @@ def hash(n=40):
     val=string.digits+string.ascii_letters
     return ''.join(random.choice(val) for i in range(n))
 
+import re
+
 def demande_creation_compte(request):
+    def login_autorise(txt):
+        # on n'autorise que les lettres et les chiffres
+        match = re.match("^[a-zA-Z0-9]+$", txt)
+        return match is not None      
     try:
         login=request.POST['login']
         prenom=request.POST['prenom']
@@ -303,6 +318,8 @@ def demande_creation_compte(request):
         utilisateurs=Utilisateur.objects.filter(user__username=login)
         if len(utilisateurs)>0:
             return False,"ce login n'est pas disponible"
+        if not login_autorise(login):
+            return False, "ce login contient des caractères interdits. Seuls les chiffres et les lettres (minuscules ou majuscules mais sans accent) sont autorisés"
     except:        
         return False,"Le formulaire est incomplet."
     try:

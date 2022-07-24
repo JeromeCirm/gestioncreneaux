@@ -160,7 +160,7 @@ def creation_creneaux(request):
     else:
         form=CreneauxForm()
     context['form']=form
-    context['creneaux']=recupere_creneaux(request,tous=True)
+    context['creneaux']=joli_date_creneaux(recupere_creneaux(request,tous=True))
     return render(request,'base/creation_creneaux.html',context)
 
 @auth([groupe_gestion_creneaux])
@@ -175,7 +175,6 @@ def modif_creneaux(request):
         response_data = {"creneaux":json_creneaux(request,tous=True,joli=False)}
         return HttpResponse(json.dumps(response_data), content_type="application/json")
     context={"menu" : menu_gestion(request)}
-    #context['creneaux']=recupere_creneaux(request,tous=True)
     return render(request,'base/modif_creneaux.html',context)
 
 @auth([groupe_gestion_creneaux])

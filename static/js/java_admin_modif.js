@@ -80,7 +80,7 @@ function affiche_creneau(creneaux) {
         var child=document.createElement('div')
         child.setAttribute('class','item_formulaire center')
         var label=document.createElement('label')
-        label.innerHTML="date : "
+        label.innerHTML="date : "+creneau["joliedate"]
         child.appendChild(label)
         var date=document.createElement('input')
         date.setAttribute('type','date')
