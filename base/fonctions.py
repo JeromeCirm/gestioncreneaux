@@ -569,12 +569,12 @@ def recupere_coordonnees_staff():
         res.append({"nom" : user.first_name+" "+user.last_name,"telephone" : user.utilisateur.telephone})
     return res
 
-# liste des créneaux avec inscriptions et les personnes inscrites 
+# liste des créneaux avec inscriptions et les personnes inscrites pour le jeu
 def recupere_inscrits():
     lescreneaux=Creneaux.objects.filter(avec_inscription=True,date__gte=datetime.datetime.now()).order_by('date')
     res=[]
     for uncreneau in lescreneaux:
-        lesinscrits=Inscription.objects.filter(idcreneau=uncreneau)
+        lesinscrits=Inscription.objects.filter(idcreneau=uncreneau,statut="inscrit")
         res.append({"creneau" : jolie_date(uncreneau.date),"inscrits" : lesinscrits})
     return res
 
