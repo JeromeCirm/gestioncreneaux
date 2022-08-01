@@ -122,6 +122,12 @@ def json_creneaux(request,tous=False,joli=True):
             if x.idcreneau.pk==pk:
                 val+=1
         return val
+    def aux_staff(pk): # compte le nb de staff inscrits sur le créneau pk
+        val=0
+        for x in staff:
+            if x.idcreneau.pk==pk:
+                val+=1
+        return val
     try:
         delai=int(Textes.objects.get(nom="delai").contenu)
         if delai<0 or delai>7:
@@ -131,9 +137,10 @@ def json_creneaux(request,tous=False,joli=True):
     date_limite=datetime.date.today()+datetime.timedelta(days=delai)
     creneaux=recupere_creneaux(request,tous)
     inscrits=Inscription.objects.filter(statut="inscrit")
+    staff=Inscription.objects.filter(statut="staff_oui")
     res=[ {"pk" : x.pk,"date": jolie_date(x.date) if joli else str(x.date),"intitulé" : x.intitulé,"text_bouton" : x.text_bouton,
     "avec_inscription" : x.avec_inscription,"avec_commentaire" : x.avec_commentaire,
-    "staff" : x.staff,"nbinscrits" : aux(x.pk), "soon" : x.date<date_limite,
+    "staff" : aux_staff(x.pk),"nbinscrits" : aux(x.pk), "soon" : x.date<date_limite,
     "joliedate" : jolie_date(x.date) } for x in creneaux]
     return res
 
