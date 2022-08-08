@@ -19,7 +19,7 @@ function jeu_libre_inscription() {
 }
 
 function cmb() {
-    intitule.value="CMB "
+    intitule.value=" CMB "
     textebouton.value="Cliquer pour s'inscrire"
     avecinscription.checked=true
     aveccommentaire.checked=false

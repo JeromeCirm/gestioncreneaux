@@ -153,6 +153,7 @@ def creation_creneaux(request):
     context={"menu" : menu_gestion(request)}
     if request.method=="POST":
         form=CreneauxForm(request.POST)
+        print(request.POST)
         if form.is_valid():
             new_creneau=form.save()
             autorisation_creneau=Autorisation(idcreneau=new_creneau,groupe=sans_groupe)

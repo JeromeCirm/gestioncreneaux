@@ -4,6 +4,7 @@ from re import U
 from this import d
 from django.contrib.auth.models import Group
 from django.contrib.auth import authenticate,login
+from django.db.models.functions import Lower
 from .models import *
 from .config import *
 
@@ -95,11 +96,11 @@ def menu_gestion(request):
 # évènement extérieur : staff ok pour gérer mais pas d'inscription à l'évent.
 def recupere_creneaux(request,tous=False):
     if tous:
-        creneaux=Creneaux.objects.filter(date__gte=datetime.datetime.now()).order_by('date')
+        creneaux=Creneaux.objects.filter(date__gte=datetime.datetime.now()).order_by('date','intitulé')
     else:
         lesgroupes_q=request.user.groups.all()
         lesgroupes=[x for x in lesgroupes_q]+[sans_groupe]
-        creneaux=Creneaux.objects.filter(date__gte=datetime.datetime.now(),autorisation__groupe__in=lesgroupes).order_by('date')
+        creneaux=Creneaux.objects.filter(date__gte=datetime.datetime.now(),autorisation__groupe__in=lesgroupes).order_by('date','intitulé')
     return creneaux
 
 # transforme les dates en date fr lisibles avec jour
@@ -438,7 +439,7 @@ def modifie_compte(request):
         return False,"Formulaire incorrect"
 
 def recupere_comptes():
-    tous=User.objects.all().exclude(username='admin').order_by('username')
+    tous=User.objects.all().exclude(username='admin').order_by(Lower('first_name'),Lower('last_name'))
     res={}
     for x in tous:
         gr=x.groups.all()
@@ -570,7 +571,7 @@ def reinitialise_mot_de_passe(request):
 
 # noms et téléphones du staff
 def recupere_coordonnees_staff():
-    lestaff=groupe_staff.user_set.all()
+    lestaff=groupe_staff.user_set.all().order_by(Lower('first_name'),Lower('last_name'))
     res=[]
     for user in lestaff:
         res.append({"nom" : user.first_name+" "+user.last_name,"telephone" : user.utilisateur.telephone})

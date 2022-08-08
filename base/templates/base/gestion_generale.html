@@ -42,7 +42,7 @@
         {% csrf_token %}
             <legend class="center">Modifier les données de :
             <select id="select" onchange="ajusteDonnees()">{% for key,value in lescomptes.items %}
-                <option value="{{ key }}"> {{ value.login }}</option>{% endfor %}
+                <option value="{{ key }}"> {{ value.login }} : {{ value.prenom }} {{ value.nom }}</option>{% endfor %}
             </select> 
             </legend><BR>
      <div class="center"> <!-- grid layout on fieldset is buggy on Chrome -->
