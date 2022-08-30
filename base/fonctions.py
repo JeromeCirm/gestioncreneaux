@@ -371,7 +371,7 @@ def envoie_mail(liste_destinataire,sujet,corps_mail):
 # vérifie que le login est dispo. 
 # à faire : Si non, propose d'ajouter au groupe staff la personne
 def ajout_compte(request):
-    if True:#try:
+    try:
         login=request.POST['login']
         nom=request.POST['nom']
         prenom=request.POST['prenom']
@@ -382,7 +382,7 @@ def ajout_compte(request):
         if len(user)>0:
             return False,"Ce login est déjà utilisé"
         if ('gr_gestion' in request.POST or 'gr_admin' in request.POST ) and (request.POST['confirmation']!='CONFIRMATION'):
-            return False,"Pour créer un compte gestion ou admin, il faut entre CONFIRMATION dans le champs de confirmation"
+            return False,"Pour créer un compte gestion ou admin, il faut entrer CONFIRMATION dans le champs de confirmation"
         new_user=User.objects.create_user(username=login,first_name=prenom,last_name=nom,email=mail,password=password)
         new_user.save()
         if 'gr_staff' in request.POST:
@@ -400,7 +400,7 @@ def ajout_compte(request):
         msg+="\n\nL'équipe SSA"
         envoie_mail([mail],'Bienvenu au group staff SSA',msg)
         return True, "compte "+login+" créé"
-    #except:
+    except:
         return False,"Formulaire incorrect"
 
 def modifie_compte(request):
@@ -515,7 +515,7 @@ def envoie_mail_recuperation_mot_de_passe(request):
         lehash=hash()
         utilisateur=Utilisateur.objects.get(user=user)
         utilisateur.csrf_token=lehash
-        utilisateur.date=datetime.datetime.now()
+        utilisateur.date_demande=datetime.datetime.now()
         utilisateur.reinitialisation_password=True
         utilisateur.save()
         msg_mail="Bonjour "+user.first_name+",\n\n"
