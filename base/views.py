@@ -209,6 +209,14 @@ def gestion_generale(request):
     return render(request,'base/gestion_generale.html',context)
 
 @auth([groupe_gestion_generale])
+def vieux_creneaux(request):
+    context={"menu" : menu_staff(request)}
+    la_liste=creneau_et_staff_ancien()
+    context["staff_en_or"]=ordonne(la_liste)
+    context["creneau_et_staff"]=la_liste
+    return render(request,'base/recapitulatif_vieux.html',context)
+
+@auth([groupe_gestion_generale])
 def initialisation(request):
     context={"menu" : menu_gestion(request)}
     envoie_mail_bis(['jerome.99@hotmail.fr'],"bienvenu à SSA","Bonjour\n\nCeci est un premier mail pour tester TLS\n\n Jerome")

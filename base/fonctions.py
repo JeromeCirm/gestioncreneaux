@@ -41,6 +41,7 @@ def menu(request):
         if groupe_gestion_generale in lesgroupes:
             liste_menu+=[
                 ["gestion_generale","gestion generale"],
+                ["vieux_creneaux","vieux créneaux"],
                 ["initialisation","initialisation"],
             ]
     else:
@@ -626,6 +627,31 @@ def change_reglages(request):
     except:
         return "Erreur lors du changement des réglages"
 
+def creneau_et_staff_ancien():
+    creneaux=Creneaux.objects.all().order_by('date','intitulé')
+    present=Inscription.objects.filter(statut="staff_oui")
+    sibesoin=Inscription.objects.filter(statut="staff_sibesoin")
+    res={ x.pk : {"date": jolie_date(x.date),"intitulé" : x.intitulé,
+    "present" : [],"sibesoin" : []} for x in creneaux}
+    for x in present:
+        if x.idcreneau.pk in res:
+            res[x.idcreneau.pk]["present"].append(x.user.first_name+" "+x.user.last_name)
+    for x in sibesoin:
+        if x.idcreneau.pk in res:
+            res[x.idcreneau.pk]["sibesoin"].append(x.user.first_name+" "+x.user.last_name)
+    for x in res:
+        res[x]["nb"]=len(res[x]["present"])
+    return res
+
+def ordonne(la_liste):
+    D={}
+    for _,value in la_liste.items():
+        for x in value["present"]:
+            if x in D:
+                D[x]+=1
+            else:
+                D[x]=1
+    return sorted(D.items(),key=lambda x : -x[1])
 
 
 

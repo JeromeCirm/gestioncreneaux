@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+
+{% block body %}
+{% include 'menu.html'%}
+<BR>
+Récapitulatif du nombre de créneaux tenus par chaque personne :
+<div class="creneaux_recapitulatif center">{% for nom,valeur in staff_en_or %}
+    <div> {{ nom }}</div>
+    <div> {{ valeur}} créneaux</div>{% endfor %}
+</div><BR><BR>
+Rappels des créneau passés et à venir :
+<div class="creneaux_recapitulatif center">{% for key,x in creneau_et_staff.items %} 
+    <div {% if x.nb == 0 %} class="cwhite red" {% endif %}> {{ x.date }} : {{ x.intitulé }}</div>
+    <div> {% for y in x.present %} {{y}}, {% endfor %} {% if x.sibesoin %} <span class="cred">
+          {% for y in x.sibesoin %} {{y}}, {% endfor %} </span> {% endif %}</div> {% endfor %}
+</div>
+{% endblock body %}
