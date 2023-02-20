@@ -31,12 +31,12 @@ def menu(request):
                 ["gestion_creneaux","gestion creneaux"],
                 ["recapitulatif","recapitulatif"],
                 ["coordonnees","coordonnées staff"],
+                ["inscrits","inscrits"],
             ]
         if groupe_gestion_creneaux in lesgroupes:
             liste_menu+=[
                 ["creation_creneaux","creation creneaux"],
                 ["modif_creneaux","modif creneaux"],
-                ["inscrits","inscrits"],
             ]
         if groupe_gestion_generale in lesgroupes:
             liste_menu+=[
@@ -152,10 +152,13 @@ def json_inscription(request,staff=False):
     inscription=Inscription.objects.filter(user=request.user)
     res={}
     for x in inscription:
-        if staff and x.statut in ["staff_oui","staff_sibesoin"]:
+        if x.idcreneau.pk not in res:
             res[x.idcreneau.pk]={"statut" : x.statut,"commentaire" : x.commentaire}
-        if (not staff) and x.statut=="inscrit":
-            res[x.idcreneau.pk]={"statut" : x.statut,"commentaire" : x.commentaire}
+        else:
+            if "staff_oui" in [res[x.idcreneau.pk]["statut"],x.statut]:
+                res[x.idcreneau.pk]={"statut" : "staff_oui_inscrit","commentaire" : x.commentaire}
+            else:
+                res[x.idcreneau.pk]={"statut" : "staff_sibesoin_inscrit","commentaire" : x.commentaire}
     return res
 
 # recupère la liste des créneaux et du staff présent
@@ -206,6 +209,35 @@ def click_staff(request):
                 # le créneau existe et est autorisé pour user
         if True: # début à enlever : le staff gère tout sans pb d'autorisation
                 inscriptions=Inscription.objects.filter(idcreneau=creneau,user=request.user)
+                l=[]
+                for inscription in inscriptions:
+                    l.append(inscription.statut)
+                l.sort()
+                if l==["inscrit","staff_oui"]:
+                    for inscription in inscriptions:
+                        if inscription.statut=="inscrit":
+                            inscription.delete()
+                elif l==["staff_oui"]:
+                    for inscription in inscriptions:
+                        inscription.statut="staff_sibesoin"
+                        inscription.save()
+                        creneau.staff==max(creneau.staff-1,0)
+                        creneau.save()               
+                elif "staff_sibesoin" in l:
+                    for inscription in inscriptions:
+                        if inscription.statut=="staff_sibesoin":
+                            inscription.delete()                
+                else:
+                    new_inscription=Inscription(idcreneau=creneau,user=request.user,statut="staff_oui")
+                    new_inscription.save()
+                    creneau.staff=creneau.staff+1
+                    creneau.save()
+                    if "inscrit" not in l:
+                        new_inscription=Inscription(idcreneau=creneau,user=request.user,statut="inscrit")
+                        new_inscription.save()
+                return
+                # pour mémoire : ce qui suit est l'ancienne version
+
                 for inscription in inscriptions:
                     if inscription.statut=="staff_sibesoin":
                         inscription.statut="staff_oui"
@@ -247,9 +279,9 @@ def click_creneau(request):
                 new_inscription=Inscription(idcreneau=creneau,user=request.user,statut="inscrit")
                 new_inscription.save()
                 return
-        #print("pas d'autorisation")
+        print("pas d'autorisation")
     except:
-        #print("click non traité pour cause d'erreur")
+        print("click non traité pour cause d'erreur")
         pass
 
 #partie gestion : modif/suppression d'un créneau 

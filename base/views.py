@@ -178,7 +178,7 @@ def modif_creneaux(request):
     context={"menu" : menu_gestion(request)}
     return render(request,'base/modif_creneaux.html',context)
 
-@auth([groupe_gestion_creneaux])
+@auth([groupe_staff])
 def inscrits(request):
     context={"menu" : menu_staff(request), "inscriptions" : recupere_inscrits()}
     return render(request,'base/inscrits.html',context)

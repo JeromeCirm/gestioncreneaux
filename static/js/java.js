@@ -40,12 +40,18 @@ function affiche_creneau_staff(creneaux,inscription,id,avecclick) {
         var label=document.createElement('label')
         label.setAttribute('onclick','click_staff('+inter.toString()+')')
         if (inter in inscription) {
-            if (inscription[inter].statut=="staff_sibesoin") {
+            if ((inscription[inter].statut=="staff_sibesoin") || (inscription[inter].statut=="staff_sibesoin_inscrit")) {
                 label.innerHTML="Si Besoin"
                 label.setAttribute('class','round darkblue cwhite pointer')
-            } else {
-                label.innerHTML="Présent(e)"
+            } else if (inscription[inter].statut=="staff_oui_inscrit") {
+                label.innerHTML="Présent(e) avec jeu"
                 label.setAttribute('class','round orange cblack pointer')
+            } else if (inscription[inter].statut=="staff_oui") {
+                label.innerHTML="Présent(e) sans jeu"
+                label.setAttribute('class','round orange cblack pointer')
+            } else {
+                label.innerHTML="Jeu seul"
+                label.setAttribute('class','round red cblack pointer')
             }
         } else {
             label.innerHTML="Absent(e)"
@@ -103,7 +109,8 @@ function affiche_creneau_general(creneaux,inscription) {
             noeud.appendChild(label)
         } else if (creneau.avec_inscription) {
             label.setAttribute('onclick','click_creneau('+inter.toString()+')')
-            if (inter in inscription) {
+            if ((inter in inscription) && ((inscription[inter].statut=="staff_sibesoin_inscrit") 
+                || (inscription[inter].statut=="staff_oui_inscrit" || (inscription[inter].statut=="inscrit")))) {
                 label.innerHTML="Inscrit(e) !"
                 label.setAttribute('class','round orange pointer')
             } else {
