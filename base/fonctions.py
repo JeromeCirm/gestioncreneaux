@@ -616,7 +616,7 @@ def recupere_inscrits():
     res=[]
     for uncreneau in lescreneaux:
         lesinscrits=Inscription.objects.filter(idcreneau=uncreneau,statut="inscrit")
-        res.append({"creneau" : jolie_date(uncreneau.date),"inscrits" : lesinscrits})
+        res.append({"creneau" : jolie_date(uncreneau.date)+", "+uncreneau.intitulé,"inscrits" : lesinscrits})
     return res
 
 # modifie le nombre de jours à partir duquel un créneau n'est pas indiqué en rouge sans staff
