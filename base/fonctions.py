@@ -687,11 +687,17 @@ def ordonne(la_liste):
     return sorted(D.items(),key=lambda x : -x[1])
 
 def ouverts(liste):
-    D={"lundi" : 0, "mardi" : 0 , "mercredi" : 1, "jeudi" :0}
+    proposés=0
+    ouverts=0
+    for x in liste:
+        proposés+=1
+        if liste[x]["nb"]>0:
+            ouverts+=1
+    D={"proposés" : proposés, "ouverts" : ouverts}
     return D
 
-def recupere_stats_fonction(fonction):
-    creneaux=Creneaux.objects.all().order_by('date','intitulé')
+def recupere_stats_fonction(fonction,datedebut,datefin):
+    creneaux=Creneaux.objects.all().filter(date__gte=datetime.datetime.strptime(datedebut,'%Y-%m-%d')).filter(date__lte=datetime.datetime.strptime(datefin,'%Y-%m-%d')).order_by('date','intitulé')
     present=Inscription.objects.filter(statut="staff_oui")
     sibesoin=Inscription.objects.filter(statut="staff_sibesoin")
     res={ x.pk : {"date": jolie_date(x.date),"intitulé" : x.intitulé,
@@ -704,15 +710,8 @@ def recupere_stats_fonction(fonction):
             res[x.idcreneau.pk]["sibesoin"].append(x.user.first_name+" "+x.user.last_name)
     for x in res:
         res[x]["nb"]=len(res[x]["present"])    
-    print(res)
-    response={"creneau_et_staff" : res,"staff_en_or" : ordonne(res),"creneaux_ouverts" : ouverts(res)}
-
-    if fonction=="staff_creneaux":
-        pass
-        #response["staff_creneaux"]=[]
-    elif fonction=="creneaux_ouverts":
-        pass
-        #reponse["creneaux_ouverts"]=[]
+    #print(res)
+    response={"creneau_et_staff" : res,"staff_en_or" : ordonne(res),"creneaux_stats" : ouverts(res)}
     return response
 
 

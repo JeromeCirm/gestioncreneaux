@@ -218,8 +218,8 @@ def stats(request):
 
 @auth([groupe_gestion_generale])
 def recupere_stats(request):
-    if request.method=='POST' and "fonction" in request.POST:
-        response_data=recupere_stats_fonction(request.POST["fonction"])
+    if request.method=='POST' and "fonction" in request.POST and "datedebut" in request.POST and "datefin" in request.POST:
+        response_data=recupere_stats_fonction(request.POST["fonction"],request.POST["datedebut"],request.POST["datefin"])
     else:
         response_data={}
     return HttpResponse(json.dumps(response_data), content_type="application/json")    

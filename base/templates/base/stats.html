@@ -4,20 +4,31 @@
 {% include 'menu.html'%}
 <BR>
     {% csrf_token %}
+    <div class="item_formulaire">
+        <label for="id_date_debut">Date de début de période :</label>
+        <input type="date" id="id_date_debut">
+        <label for="id_date_fin">  Date de fin de période:</label>
+        <input type="date" id="id_date_fin">    
+    </div><BR>
+Stats sur l'ensemble de la période :
+    <div id="stats_generales" class="creneaux_recapitulatif center">
+    </div><BR><BR>
 Récapitulatif du nombre de créneaux tenus par chaque personne :
 <div id="staff_or" class="creneaux_recapitulatif center">
 </div><BR><BR>
-Rappels des créneau passés et à venir :
-<div id="staff_creneaux" class="creneaux_recapitulatif center">{% for key,x in creneau_et_staff.items %} 
-    <div {% if x.nb == 0 %} class="cwhite red" {% endif %}> {{ x.date }} : {{ x.intitulé }}</div>
-    <div> {% for y in x.present %} {{y}}, {% endfor %} {% if x.sibesoin %} <span class="cred">
-          {% for y in x.sibesoin %} {{y}}, {% endfor %} </span> {% endif %}</div> {% endfor %}
+Rappels des créneaux passés et à venir :
+<div id="staff_creneaux" class="creneaux_recapitulatif center">
 </div>
 
 <script>
-    function click(fonction) {
+var id_date_debut= document.getElementById('id_date_debut')
+var id_date_fin= document.getElementById('id_date_fin')
+
+function click(fonction) {
     var formData = new FormData();
 	formData.append('fonction', fonction);
+    formData.append('datedebut',id_date_debut.value)
+    formData.append('datefin',id_date_fin.value)
     csrf=document.getElementsByName('csrfmiddlewaretoken')[0]
     formData.append('csrfmiddlewaretoken',csrf.value)
 	fetch("recupere_stats", {
@@ -31,6 +42,11 @@ Rappels des créneau passés et à venir :
         if (fonction=="staff_creneaux") { affiche_staff_creneaux(res["creneau_et_staff"])}
         else if (fonction=="creneaux_ouverts") { affiche_creneaux_ouverts(res)}
         else if (fonction=="staff_or") { affiche_staff_or(res["staff_en_or"])}
+        else if (fonction=="tout") {
+            affiche_staff_creneaux(res["creneau_et_staff"])
+            affiche_staff_or(res["staff_en_or"])
+            affiche_creneaux_ouverts(res["creneaux_stats"])
+        }
  	  })
   	  .catch(function(err){ console.log('Erreur requête', err);});
 }
@@ -55,25 +71,40 @@ function affiche_staff_creneaux(res) {
     for (var tmp in res) {
         staff=res[tmp]
         var noeud=document.createElement('div')
-        noeud.innerHTML=staff[0]
-        staff_or.appendChild(noeud)
+        noeud.innerHTML=staff["date"]+" : "+staff["intitulé"]
+        if (staff["nb"]==0) { 
+            noeud.setAttribute('class','cwhite red')
+        }
+        staff_creneaux.appendChild(noeud)
         var noeud=document.createElement('div')
-        noeud.innerHTML=staff[1]
-        staff_or.appendChild(noeud)
-        var noeud=document.createElement('div')
-        noeud.innerHTML=staff[2]
-        staff_or.appendChild(noeud)        
+        if ((staff["present"].length>0) && (staff["sibesoin"].length>0)) {
+            sep=","
+        } else { sep=""}
+        noeud.innerHTML=staff["present"].toString()+sep+" <span class='cred'> "+staff["sibesoin"].toString()+" </span>"
+        staff_creneaux.appendChild(noeud)   
     }
 }
 
 function affiche_creneaux_ouverts(res) {
-
+    var stats_generales=document.getElementById('stats_generales')
+    stats_generales.innerHTML="";
+    var noeud=document.createElement('div')
+    noeud.innerHTML="créneaux envisagés : "+res["proposés"]
+    stats_generales.appendChild(noeud)
+    var noeud=document.createElement('div')
+    noeud.innerHTML="créneaux réellements ouverts : "+res["ouverts"]
+    stats_generales.appendChild(noeud)
 }
 
+//click("tout") //  séparer les 3 dans le futur?
 // initialise les données
-click("staff_or")
-click("staff_creneaux")
-click("creneaux_ouverts")
-
+//click("staff_or")
+//click("staff_creneaux")
+//click("creneaux_ouverts")
+id_date_debut.valueAsDate = new Date(2022,6,24)
+id_date_fin.valueAsDate = new Date()
+id_date_debut.onchange=function () {click("tout")}
+id_date_fin.onchange=function () {click("tout")}
+click("tout")
 </script>
 {% endblock body %}
