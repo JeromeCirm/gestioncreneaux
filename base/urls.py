@@ -20,7 +20,8 @@ urlpatterns = [
     re_path(r'demande_reinitialisationa*',views.demande_reinitialisation,name='demande_reinitialisation_erreur'),
     path('reglages',views.reglages,name='reglages'),
     path('informations',views.informations,name='informations'),
-    path('vieux_creneaux',views.vieux_creneaux,name='vieux_creneaux'),
+    path('stats',views.stats,name='stats'),
+    path('recupere_stats',views.recupere_stats,name='recupere_stats'),
     re_path(r'a*', views.creneaux,name='creneaux'),   
 ]
 

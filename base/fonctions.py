@@ -41,7 +41,7 @@ def menu(request):
         if groupe_gestion_generale in lesgroupes:
             liste_menu+=[
                 ["gestion_generale","gestion generale"],
-                ["vieux_creneaux","vieux créneaux"],
+                ["stats","statistiques"],
                 ["initialisation","initialisation"],
             ]
     else:
@@ -660,6 +660,7 @@ def change_reglages(request):
         return "Erreur lors du changement des réglages"
 
 def creneau_et_staff_ancien():
+    return
     creneaux=Creneaux.objects.all().order_by('date','intitulé')
     present=Inscription.objects.filter(statut="staff_oui")
     sibesoin=Inscription.objects.filter(statut="staff_sibesoin")
@@ -685,5 +686,33 @@ def ordonne(la_liste):
                 D[x]=1
     return sorted(D.items(),key=lambda x : -x[1])
 
+def ouverts(liste):
+    D={"lundi" : 0, "mardi" : 0 , "mercredi" : 1, "jeudi" :0}
+    return D
+
+def recupere_stats_fonction(fonction):
+    creneaux=Creneaux.objects.all().order_by('date','intitulé')
+    present=Inscription.objects.filter(statut="staff_oui")
+    sibesoin=Inscription.objects.filter(statut="staff_sibesoin")
+    res={ x.pk : {"date": jolie_date(x.date),"intitulé" : x.intitulé,
+    "present" : [],"sibesoin" : []} for x in creneaux}
+    for x in present:
+        if x.idcreneau.pk in res:
+            res[x.idcreneau.pk]["present"].append(x.user.first_name+" "+x.user.last_name)
+    for x in sibesoin:
+        if x.idcreneau.pk in res:
+            res[x.idcreneau.pk]["sibesoin"].append(x.user.first_name+" "+x.user.last_name)
+    for x in res:
+        res[x]["nb"]=len(res[x]["present"])    
+    print(res)
+    response={"creneau_et_staff" : res,"staff_en_or" : ordonne(res),"creneaux_ouverts" : ouverts(res)}
+
+    if fonction=="staff_creneaux":
+        pass
+        #response["staff_creneaux"]=[]
+    elif fonction=="creneaux_ouverts":
+        pass
+        #reponse["creneaux_ouverts"]=[]
+    return response
 
 

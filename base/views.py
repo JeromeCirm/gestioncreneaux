@@ -209,12 +209,20 @@ def gestion_generale(request):
     return render(request,'base/gestion_generale.html',context)
 
 @auth([groupe_gestion_generale])
-def vieux_creneaux(request):
+def stats(request):
     context={"menu" : menu_staff(request)}
-    la_liste=creneau_et_staff_ancien()
-    context["staff_en_or"]=ordonne(la_liste)
-    context["creneau_et_staff"]=la_liste
-    return render(request,'base/recapitulatif_vieux.html',context)
+    #la_liste=creneau_et_staff_ancien()
+    #context["staff_en_or"]=ordonne(la_liste)
+    #context["creneau_et_staff"]=la_liste
+    return render(request,'base/stats.html',context)
+
+@auth([groupe_gestion_generale])
+def recupere_stats(request):
+    if request.method=='POST' and "fonction" in request.POST:
+        response_data=recupere_stats_fonction(request.POST["fonction"])
+    else:
+        response_data={}
+    return HttpResponse(json.dumps(response_data), content_type="application/json")    
 
 @auth([groupe_gestion_generale])
 def initialisation(request):

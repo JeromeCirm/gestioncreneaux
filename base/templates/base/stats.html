@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+
+{% block body %}
+{% include 'menu.html'%}
+<BR>
+    {% csrf_token %}
+Récapitulatif du nombre de créneaux tenus par chaque personne :
+<div id="staff_or" class="creneaux_recapitulatif center">
+</div><BR><BR>
+Rappels des créneau passés et à venir :
+<div id="staff_creneaux" class="creneaux_recapitulatif center">{% for key,x in creneau_et_staff.items %} 
+    <div {% if x.nb == 0 %} class="cwhite red" {% endif %}> {{ x.date }} : {{ x.intitulé }}</div>
+    <div> {% for y in x.present %} {{y}}, {% endfor %} {% if x.sibesoin %} <span class="cred">
+          {% for y in x.sibesoin %} {{y}}, {% endfor %} </span> {% endif %}</div> {% endfor %}
+</div>
+
+<script>
+    function click(fonction) {
+    var formData = new FormData();
+	formData.append('fonction', fonction);
+    csrf=document.getElementsByName('csrfmiddlewaretoken')[0]
+    formData.append('csrfmiddlewaretoken',csrf.value)
+	fetch("recupere_stats", {
+	  method : 'POST',
+	  headers : {
+		'Accept': 'application/json, text/plain, */*',
+  	  },
+  	  body: formData
+	}).then(function(res){ return res.json();})
+	  .then(function(res){
+        if (fonction=="staff_creneaux") { affiche_staff_creneaux(res["creneau_et_staff"])}
+        else if (fonction=="creneaux_ouverts") { affiche_creneaux_ouverts(res)}
+        else if (fonction=="staff_or") { affiche_staff_or(res["staff_en_or"])}
+ 	  })
+  	  .catch(function(err){ console.log('Erreur requête', err);});
+}
+
+function affiche_staff_or(res) {
+    var staff_or=document.getElementById('staff_or')
+    staff_or.innerHTML="";
+    for (var tmp in res) {
+        staff=res[tmp]
+        var noeud=document.createElement('div')
+        noeud.innerHTML=staff[0]
+        staff_or.appendChild(noeud)
+        var noeud=document.createElement('div')
+        noeud.innerHTML=staff[1]
+        staff_or.appendChild(noeud)
+    }
+}
+
+function affiche_staff_creneaux(res) {
+    var staff_creneaux=document.getElementById('staff_creneaux')
+    staff_creneaux.innerHTML="";
+    for (var tmp in res) {
+        staff=res[tmp]
+        var noeud=document.createElement('div')
+        noeud.innerHTML=staff[0]
+        staff_or.appendChild(noeud)
+        var noeud=document.createElement('div')
+        noeud.innerHTML=staff[1]
+        staff_or.appendChild(noeud)
+        var noeud=document.createElement('div')
+        noeud.innerHTML=staff[2]
+        staff_or.appendChild(noeud)        
+    }
+}
+
+function affiche_creneaux_ouverts(res) {
+
+}
+
+// initialise les données
+click("staff_or")
+click("staff_creneaux")
+click("creneaux_ouverts")
+
+</script>
+{% endblock body %}
