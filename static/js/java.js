@@ -103,29 +103,40 @@ function affiche_creneau_general(creneaux,inscription) {
         divCreneaux.appendChild(noeud)
         var noeud=document.createElement('div')
         var label=document.createElement('label')
-        if ((creneau.soon || creneau.avec_inscription ) && creneau.staff == 0) {
-            label.innerHTML="Créneau en attente"
-            label.setAttribute('class','round red')
+        if (creneau.type_creneau==2) {
+            label.innerHTML=creneau.text_bouton
+            label.setAttribute('class','round blue pointer')
+            label.setAttribute('onclick','lien("'+creneau.lien+'")')
             noeud.appendChild(label)
-        } else if (creneau.avec_inscription) {
-            label.setAttribute('onclick','click_creneau('+inter.toString()+')')
-            if ((inter in inscription) && ((inscription[inter].statut=="staff_sibesoin_inscrit") 
-                || (inscription[inter].statut=="staff_oui_inscrit" || (inscription[inter].statut=="inscrit")))) {
-                label.innerHTML="Inscrit(e) !"
-                label.setAttribute('class','round orange pointer')
+        } else {
+            if ((creneau.soon || (creneau.type_creneau==1) ) && creneau.staff == 0) {
+                label.innerHTML="Créneau en attente"
+                label.setAttribute('class','round red')
+                noeud.appendChild(label)
+            } else if (creneau.type_creneau==1) {
+                label.setAttribute('onclick','click_creneau('+inter.toString()+')')
+                if ((inter in inscription) && ((inscription[inter].statut=="staff_sibesoin_inscrit") 
+                    || (inscription[inter].statut=="staff_oui_inscrit" || (inscription[inter].statut=="inscrit")))) {
+                    label.innerHTML="Inscrit(e) !"
+                    label.setAttribute('class','round orange pointer')
+                } else {
+                    label.innerHTML=creneau.text_bouton
+                    label.setAttribute('class','round blue pointer')
+                }
+                var nb=document.createElement('span')
+                nb.innerHTML='<BR>'+creneau.nbinscrits.toString()+' inscrit(e)s'
+                noeud.appendChild(label)
+                noeud.appendChild(nb)
             } else {
                 label.innerHTML=creneau.text_bouton
-                label.setAttribute('class','round blue pointer')
+                label.setAttribute('class','roundlibre')
+                noeud.appendChild(label)
             }
-            var nb=document.createElement('span')
-            nb.innerHTML='<BR>'+creneau.nbinscrits.toString()+' inscrit(e)s'
-            noeud.appendChild(label)
-            noeud.appendChild(nb)
-        } else {
-            label.innerHTML=creneau.text_bouton
-            label.setAttribute('class','roundlibre')
-            noeud.appendChild(label)
-        }
+        } 
         divCreneaux.appendChild(noeud)
     }
+}
+
+function lien(txt) {
+    window.location.href = txt
 }

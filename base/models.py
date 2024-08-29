@@ -15,8 +15,11 @@ class Creneaux(models.Model):
     date=models.DateField()
     intitulé=models.CharField(max_length=100)
     text_bouton=models.CharField(max_length=100,default="")
-    avec_inscription=models.BooleanField(default=False)
-    avec_commentaire=models.BooleanField(default=False)
+    type_creneau=models.IntegerField(default=0)
+    # 0 : créneau classique
+    # 1 : avec inscription
+    # 2 : avec lien html
+    lien=models.CharField(max_length=100,default="",blank=True)
     staff=models.IntegerField(default=0,blank=True)
 
 class Inscription(models.Model):

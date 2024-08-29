@@ -5,7 +5,7 @@ class UtilisateurAdmin(admin.ModelAdmin):
     list_display=('user','telephone','date_demande','en_attente_confirmation','reinitialisation_password')
 
 class CreneauxAdmin(admin.ModelAdmin):
-    list_display=('date','intitulé','text_bouton','avec_inscription','avec_commentaire','staff')
+    list_display=('date','intitulé','text_bouton','type_creneau','lien','staff')
 
 class InscriptionAdmin(admin.ModelAdmin):
     list_display=('idcreneau','user','commentaire','statut')

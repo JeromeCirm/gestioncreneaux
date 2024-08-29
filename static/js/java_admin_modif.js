@@ -11,7 +11,7 @@ function maj_bouton(id) {
 
 /* appel de l'API pour gérer un click(éventuellement) et mettre 
 à jour les créneaux concernés */
-function modifie(id) {
+function modifie(id,type_lien) {
     var formData = new FormData();
 	  formData.append('id', id);
     formData.append('action','modifie')
@@ -22,16 +22,18 @@ function modifie(id) {
     formData.append('date',date.value)
     intitule=document.getElementById(lid+'intitule')
     formData.append('intitule',intitule.value)
+
     text_bouton=document.getElementById(lid+'text_bouton')
     formData.append('text_bouton',text_bouton.value)
-    avec_inscription=document.getElementById(lid+'avec_inscription')
-    if (avec_inscription.checked) {
-      formData.append('avec_inscription','on')
+    text_lien=document.getElementById(lid+'text_lien')
+    formData.append('lien',text_lien.value)
+    type_creneau=document.getElementsByName(lid+'type_creneau')
+    for (var i=0; i < type_creneau.length; i++)  {
+      if (type_creneau[i].checked) {
+        formData.append('type_creneau',type_creneau[i].value)
+      }
     }
-    avec_commentaire=document.getElementById(lid+'avec_commentaire')
-    if (avec_commentaire.checked) {
-      formData.append('avec_commentaire','on')
-    }
+    
     fetch("modif_creneaux", {
 	  method : 'POST',
 	  headers : {
@@ -110,39 +112,75 @@ function affiche_creneau(creneaux) {
         text_bouton.setAttribute('id',lid+'text_bouton')
         child.appendChild(text_bouton)
         noeud.appendChild(child)
-
+        
         var child=document.createElement('div')
         child.setAttribute('class','item_formulaire center')
         var label=document.createElement('label')
-        label.innerHTML="avec inscription ? : "
+        label.innerHTML="lien HTML : "
         child.appendChild(label)
-        var avec_inscription=document.createElement('input')
-        avec_inscription.setAttribute('type','checkbox')
-        avec_inscription.checked=creneau["avec_inscription"]
-        avec_inscription.setAttribute('id',lid+'avec_inscription')
-        avec_inscription.setAttribute('onchange','maj_bouton('+inter.toString()+')')
-        child.appendChild(avec_inscription)
+        var lien=document.createElement('input')
+        lien.value=creneau["lien"]
+        lien.setAttribute('id',lid+'text_lien')
+        child.appendChild(lien)
+        noeud.appendChild(child)
+        
+        
+        var child=document.createElement('div')
+        var ip=document.createElement('input')
+        ip.setAttribute('type','radio')
+        ip.setAttribute('id',lid+'sans_inscription')
+        ip.setAttribute('name',lid+'type_creneau')
+        ip.setAttribute('value','0')
+        if (creneau.type_creneau == 0 ) {
+          ip.checked=true
+        }
+        child.appendChild(ip)
+        var lab=document.createElement('label')
+        lab.setAttribute('for',lid+'sans_inscription')
+        lab.innerHTML="créneau libre"
+        child.appendChild(lab)
+        var ip=document.createElement('input')
+        ip.setAttribute('type','radio')
+        ip.setAttribute('id',lid+'avec_inscription')
+        ip.setAttribute('name',lid+'type_creneau')
+        ip.setAttribute('value','1')
+        if (creneau.type_creneau == 1 ) {
+          ip.checked=true
+        }
+        child.appendChild(ip)
+        var lab=document.createElement('label')
+        lab.setAttribute('for',lid+'avec_inscription')
+        lab.innerHTML="avec inscription"
+        child.appendChild(lab)
         noeud.appendChild(child)
 
+
         var child=document.createElement('div')
-        child.setAttribute('class','item_formulaire center')
-        var label=document.createElement('label')
-        label.innerHTML="avec commentaire ? : "
-        child.appendChild(label)
-        var avec_commentaire=document.createElement('input')
-        avec_commentaire.setAttribute('type','checkbox')
-        avec_commentaire.checked=creneau["avec_commentaire"]
-        avec_commentaire.setAttribute('id',lid+'avec_commentaire')
-        child.appendChild(avec_commentaire)
-        noeud.appendChild(child)
+        var ip=document.createElement('input')
+        ip.setAttribute('type','radio')
+        ip.setAttribute('id',lid+'lien')
+        ip.setAttribute('name',lid+'type_creneau')
+        ip.setAttribute('value','2')
+        if (creneau.type_creneau == 2 ) {
+          ip.checked=true
+        }        
+        child.appendChild(ip)
+        var lab=document.createElement('label')
+        lab.setAttribute('for',lid+'lien')
+        lab.innerHTML="lien HTML"
+        child.appendChild(lab)
+        noeud.appendChild(child)        
+
+
+
 
         var bout_modifie=document.createElement('button')
-        bout_modifie.setAttribute('onclick','modifie('+inter.toString()+',true)')
+        bout_modifie.setAttribute('onclick','modifie('+inter.toString()+','+')')
         bout_modifie.innerHTML="Enregistrer les modifs de ce créneau"
         noeud.appendChild(bout_modifie)
 
         var bout_supprime=document.createElement('button')
-        bout_supprime.setAttribute('onclick','supprime('+inter.toString()+')')
+        bout_supprime.setAttribute('onclick','supprime('+inter.toString()+',true)')
         bout_supprime.innerHTML="Supprimer ce créneau"
         noeud.appendChild(bout_supprime)
         divCreneaux.appendChild(noeud)

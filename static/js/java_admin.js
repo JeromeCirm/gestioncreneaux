@@ -1,37 +1,32 @@
 /* modèle de créneau */
 var intitule=document.getElementById("id_intitulé")
 var textebouton=document.getElementById("id_text_bouton")
-var avecinscription=document.getElementById("id_avec_inscription")
-var aveccommentaire=document.getElementById("id_avec_commentaire")
+var sans_inscription=document.getElementById("sans_inscription")
+var avec_inscription=document.getElementById("avec_inscription")
+var lien_html=document.getElementById("lien")
 
 function jeu_libre_classique() {
     intitule.value=""
     textebouton.value="Accès libre"
-    avecinscription.checked=false
-    aveccommentaire.checked=false
+    sans_inscription.checked=true
 }
 
 function jeu_libre_inscription() {
     intitule.value=""
     textebouton.value="Cliquer pour s'inscrire"
-    avecinscription.checked=true
-    aveccommentaire.checked=false
+    avec_inscription.checked=true
 }
 
 function cmb() {
     intitule.value=" CMB "
     textebouton.value="Cliquer pour s'inscrire"
-    avecinscription.checked=true
-    aveccommentaire.checked=false
+    avec_inscription.checked=true
 }
 
-/* met à jour le texte par défaut du bouton quand on change le champ inscription*/
-function MajInscription() {
-    if (avecinscription.checked) {
-        textebouton.value="Cliquer pour s'inscrire"
-    } else {
-        textebouton.value="Accès libre"
-    }
+function avec_lien() {
+    intitule.value=""
+    textebouton.value="Lien d'inscription"
+    lien_html.checked=true
 }
 
 /* sans doute le plus courant */

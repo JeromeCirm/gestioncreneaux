@@ -42,6 +42,7 @@ def creneaux(request):
             "inscription":json_inscription(request)}
         else:
             if ("avecclick" in request.POST) and (request.POST["avecclick"]=="true"):
+                # on redirigera vers la page de connexion 
                 response_data={"demande" : "creneaux"}
             else:
                 response_data={"creneaux":json_creneaux(request),"inscription" :{}}
@@ -102,6 +103,12 @@ def recuperation_password(request):
         context["msg"]=envoie_mail_recuperation_mot_de_passe(request)
     return render(request,'base/recuperation_password.html',context)
 
+def recuperation_login(request):
+    context={}
+    if request.method=="POST":   
+        context["msg"]=envoie_mail_recuperation_login(request)
+    return render(request,'base/recuperation_login.html',context)
+
 def demande_reinitialisation(request,login=None,lehash=None):
     if request.method=='POST':
         print("here")
@@ -148,19 +155,19 @@ def coordonnees(request):
     return render(request,'base/coordonnees.html',context)
 
 #pages accessibles aux gestionnaires de créneaux
+dico_type_creneau={"libre" : 0 , "inscription" : 1 , "lien" : 2 }
 @auth([groupe_gestion_creneaux])
 def creation_creneaux(request):
     context={"menu" : menu_gestion(request)}
     if request.method=="POST":
-        form=CreneauxForm(request.POST)
-        print(request.POST)
-        if form.is_valid():
-            new_creneau=form.save()
+        try:
+            new_creneau=Creneaux(date=request.POST["date"],intitulé=request.POST["intitulé"],text_bouton=request.POST["text_bouton"],
+                                 lien=request.POST["text_lien"],type_creneau=dico_type_creneau[request.POST["type_creneau"]])
+            new_creneau.save()
             autorisation_creneau=Autorisation(idcreneau=new_creneau,groupe=sans_groupe)
             autorisation_creneau.save()
-    else:
-        form=CreneauxForm()
-    context['form']=form
+        except:
+            pass
     context['creneaux']=joli_date_creneaux(recupere_creneaux(request,tous=True))
     return render(request,'base/creation_creneaux.html',context)
 
@@ -172,7 +179,6 @@ def modif_creneaux(request):
                 supprime_creneau(request.POST) 
             if request.POST['action'] =='modifie':
                 modifie_creneau(request.POST)          
-        #click_staff(request)
         response_data = {"creneaux":json_creneaux(request,tous=True,joli=False)}
         return HttpResponse(json.dumps(response_data), content_type="application/json")
     context={"menu" : menu_gestion(request)}

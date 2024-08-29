@@ -13,6 +13,7 @@ urlpatterns = [
     path('connexion',views.connexion,name='connexion'),
     path('deconnexion',views.deconnexion,name='deconnexion'),
     path('recuperation_password',views.recuperation_password,name='recuperation_password'),
+    path('recuperation_login',views.recuperation_login,name='recuperation_login'),
     path('creation_compte',views.creation_compte,name='creation_compte'),
     path('validation_compte/<str:login>/<str:lehash>',views.validation_compte,name='validation_compte'),
     re_path(r'validation_comptea*',views.validation_compte,name='validation_compte_erreur'),

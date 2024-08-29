@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block body %}
+<BR>
+{% if msg %} <span class="cred"> {{ msg }}</span><BR><BR>
+    <a href="{% url 'connexion' %}"> Retour à la page de connexion</a> <BR><BR>{% endif %}
+    <fieldset class="formulaire">
+        <legend>Formulaire de demande de login : </legend>
+        <form method="POST" action="">
+            {% csrf_token %}
+            
+            <div class="item_formulaire">
+                <label for="id_mail">mail : </label>
+                <input type="text" name="mail" maxlength="100" required id="id_mail">
+            </div> 
+            <input class="round" type="submit" value="Demande de login associé à ce mail"/>
+    
+        </form>
+    </fieldset>
+
+{% endblock body %}

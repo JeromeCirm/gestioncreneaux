@@ -1,7 +1,6 @@
 import datetime
 import locale
 from re import U
-from this import d
 from django.contrib.auth.models import Group
 from django.contrib.auth import authenticate,login
 from django.db.models.functions import Lower
@@ -107,8 +106,7 @@ def recupere_creneaux(request,tous=False):
 # transforme les dates en date fr lisibles avec jour
 def joli_date_creneaux(creneaux):
     res=[ {"pk" : x.pk,"date": jolie_date(x.date) ,"intitulé" : x.intitulé,"text_bouton" : x.text_bouton,
-    "avec_inscription" : x.avec_inscription,"avec_commentaire" : x.avec_commentaire,
-    "staff" : x.staff} for x in creneaux]
+    "type_creneau" : x.type_creneau,"lien" : x.lien, "staff" : x.staff} for x in creneaux]
     return res
 
 # récupère les créneaux existants et autorisés pour les groupes de l'utilisateur
@@ -138,18 +136,18 @@ def json_creneaux(request,tous=False,joli=True):
         delai=2
     date_limite=datetime.date.today()+datetime.timedelta(days=delai)
     creneaux=recupere_creneaux(request,tous)
-    inscrits=Inscription.objects.filter(statut="inscrit")
-    staff=Inscription.objects.filter(statut="staff_oui")
+    inscrits=Inscription.objects.filter(statut="inscrit",idcreneau__in=creneaux)
+    staff=Inscription.objects.filter(statut="staff_oui",idcreneau__in=creneaux)
     res=[ {"pk" : x.pk,"date": jolie_date(x.date) if joli else str(x.date),"intitulé" : x.intitulé,"text_bouton" : x.text_bouton,
-    "avec_inscription" : x.avec_inscription,"avec_commentaire" : x.avec_commentaire,
-    "staff" : aux_staff(x.pk),"nbinscrits" : aux(x.pk), "soon" : x.date<date_limite,
+    "type_creneau" : x.type_creneau,"lien" : x.lien, "staff" : aux_staff(x.pk),"nbinscrits" : aux(x.pk), "soon" : x.date<date_limite,
     "joliedate" : jolie_date(x.date) } for x in creneaux]
     return res
 
 # json de la liste des inscriptions de l'utilisateur
 # staff indique si c'est une inscription pour gestion staff ou juste pour jouer
 def json_inscription(request,staff=False):
-    inscription=Inscription.objects.filter(user=request.user)
+    creneaux=recupere_creneaux(request,True)
+    inscription=Inscription.objects.filter(user=request.user,idcreneau__in=creneaux)
     res={}
     for x in inscription:
         if x.idcreneau.pk not in res:
@@ -164,8 +162,8 @@ def json_inscription(request,staff=False):
 # recupère la liste des créneaux et du staff présent
 def creneau_et_staff():
     creneaux=recupere_creneaux(None,True)
-    present=Inscription.objects.filter(statut="staff_oui")
-    sibesoin=Inscription.objects.filter(statut="staff_sibesoin")
+    present=Inscription.objects.filter(statut="staff_oui",idcreneau__in=creneaux)
+    sibesoin=Inscription.objects.filter(statut="staff_sibesoin",idcreneau__in=creneaux)
     res={ x.pk : {"date": jolie_date(x.date),"intitulé" : x.intitulé,
     "present" : [],"sibesoin" : []} for x in creneaux}
     for x in present:
@@ -264,7 +262,9 @@ def click_creneau(request):
         if (request.POST['avecclick']!="true"): return
         id=int(request.POST['id'])
         creneau=Creneaux.objects.get(pk=id)
-        if not creneau.avec_inscription : return # pas d'inscription demandée? Ne doit pas arriver
+        if creneau.type_creneau!=1 : 
+            print("click sans inscription : hack")
+            return # pas d'inscription demandée? Ne doit pas arriver
         autorisation=Autorisation.objects.filter(idcreneau=creneau)
         lesgroupes=request.user.groups.all()
         for x in autorisation:
@@ -286,7 +286,7 @@ def click_creneau(request):
 
 #partie gestion : modif/suppression d'un créneau 
 def supprime_creneau(post):
-    if True: #try:
+    try:
         if post['avecclick']=="false":
             return
         id=int(post['id'])
@@ -300,7 +300,7 @@ def supprime_creneau(post):
             msg+="L'équipe SSA"
             envoie_mail(liste_mail,"Annulation de créneau",msg)
         creneau.delete()
-    #except:
+    except:
         pass #ne doit pas arriver : formulaire incorrect
         # éventuellement possible si admin loggué deux fois
 
@@ -310,16 +310,9 @@ def modifie_creneau(post):
         creneau=Creneaux.objects.get(pk=id)
         creneau.date=post['date']
         creneau.intitulé=post['intitule']
-        creneau.text_bouton=post['text_bouton']
-        if 'avec_inscription' in post:
-            creneau.avec_inscription=True  
-        else:
-            creneau.avec_inscription=False
-        creneau.text_bouton=post['text_bouton']
-        if 'avec_commentaire' in post:
-            creneau.avec_commentaire=True
-        else:
-            creneau.avec_commentaire=False
+        creneau.text_bouton=post["text_bouton"]
+        creneau.lien=post["lien"]
+        creneau.type_creneau=post["type_creneau"]
         creneau.save()
     except:
         pass #ne doit pas arriver : formulaire incorrect
@@ -347,10 +340,6 @@ def demande_creation_compte(request):
         nom=request.POST['nom']
         mail=request.POST['mail']
         telephone=request.POST['telephone']
-        password=request.POST['password']
-        password_verif=request.POST['password_verif']
-        if password!=password_verif:
-            return False,"les mots de passe ne sont pas identiques"
         # teste si l'utilisateur existe déjà
         utilisateurs=User.objects.filter(username=login)
         if len(utilisateurs)>0:
@@ -359,8 +348,16 @@ def demande_creation_compte(request):
         utilisateurs=Utilisateur.objects.filter(user__username=login)
         if len(utilisateurs)>0:
             return False,"ce login n'est pas disponible"
+        # teste si le mail est déjà utilisé
+        utilisateurs=User.objects.filter(email=mail)
+        if len(utilisateurs)>0:
+            return False,"il y a déjà un compte avec cette adresse mail."
         if not login_autorise(login):
             return False, "ce login contient des caractères interdits. Seuls les chiffres et les lettres (minuscules ou majuscules mais sans accent) sont autorisés"
+        password=request.POST['password']
+        password_verif=request.POST['password_verif']
+        if password!=password_verif:
+            return False,"les mots de passe ne sont pas identiques"
     except:        
         return False,"Le formulaire est incomplet."
     try:
@@ -447,7 +444,7 @@ def modifie_compte(request):
         if user.username=="admin":
             return False,"Impossible de modifier le compte admin"
         if ('gr_gestion' in request.POST or 'gr_admin' in request.POST ) and (request.POST['mconfirmation']!='CONFIRMATION'):
-            return False,"Pour modifier un compte gestion ou admin, il faut entre CONFIRMATION dans le champs de confirmation"
+            return False,"Pour modifier un compte gestion ou admin, il faut entrer CONFIRMATION dans le champs de confirmation"
         user.first_name=prenom
         user.last_name=nom
         user.email=mail
@@ -561,6 +558,23 @@ def envoie_mail_recuperation_mot_de_passe(request):
     except:
         return msg
 
+# action refusée pour admin ou compte gestion generale
+def envoie_mail_recuperation_login(request):
+    msg="Si l'adresse mail correspont à un compte existant, un mail a été envoyé pour indiquer le login"
+    try:
+        mail=request.POST['mail']
+        user=User.objects.filter(email=mail)[0]   # get une fois que l'on est sûr qu'il n'y a plus de doublons mail
+        if groupe_gestion_generale in user.groups.all():
+            return msg
+        msg_mail="Bonjour "+user.first_name+",\n\n"
+        msg_mail+="Une demande de login vient d'être envoyé pour ton compte SSA\n"
+        msg_mail+="Le login associé à ce compte est le suivant : "+user.username+"\n"
+        msg_mail+="\n\nL'équipe SSA"
+        envoie_mail([mail],'Récupération de login de compte SSA',msg_mail)
+        return msg
+    except:
+        return msg
+
 # vérifie si la demande de récupération de mail est légitime
 # renvoie un dictionnaire de contexte pour le template
 # le champs autorise est mis à vrai si c'est bien autorisé
@@ -612,7 +626,7 @@ def recupere_coordonnees_staff():
 
 # liste des créneaux avec inscriptions et les personnes inscrites pour le jeu
 def recupere_inscrits():
-    lescreneaux=Creneaux.objects.filter(avec_inscription=True,date__gte=datetime.datetime.now()).order_by('date')
+    lescreneaux=Creneaux.objects.filter(type_creneau=1,date__gte=datetime.datetime.now()).order_by('date')
     res=[]
     for uncreneau in lescreneaux:
         lesinscrits=Inscription.objects.filter(idcreneau=uncreneau,statut="inscrit")
