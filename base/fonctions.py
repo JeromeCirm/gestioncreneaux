@@ -549,7 +549,7 @@ def envoie_mail_recuperation_mot_de_passe(request):
         utilisateur.reinitialisation_password=True
         utilisateur.save()
         msg_mail="Bonjour "+user.first_name+",\n\n"
-        msg_mail+="Une demande de réinitialisation de mail vient d'être envoyé pour ton compte SSA\n"
+        msg_mail+="Une demande de réinitialisation de mot de passe vient d'être envoyée pour ton compte SSA\n"
         msg_mail+="clique sur ce lien pour changer de mot de passe : "
         msg_mail+=MA_URL_COMPLETE+"demande_reinitialisation/"+login+"/"+lehash
         msg_mail+="\n\nL'équipe SSA"
@@ -567,7 +567,7 @@ def envoie_mail_recuperation_login(request):
         if groupe_gestion_generale in user.groups.all():
             return msg
         msg_mail="Bonjour "+user.first_name+",\n\n"
-        msg_mail+="Une demande de login vient d'être envoyé pour ton compte SSA\n"
+        msg_mail+="Une demande de login vient d'être envoyée pour ton compte SSA\n"
         msg_mail+="Le login associé à ce compte est le suivant : "+user.username+"\n"
         msg_mail+="\n\nL'équipe SSA"
         envoie_mail([mail],'Récupération de login de compte SSA',msg_mail)
