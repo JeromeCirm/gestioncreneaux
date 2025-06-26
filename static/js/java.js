@@ -100,6 +100,7 @@ function affiche_creneau_general(creneaux,inscription,statut) {
         inter=creneau.pk
         var noeud=document.createElement('div')
         noeud.innerHTML=creneau.date+" :<BR>"+creneau["intitulé"]
+        console.log(statut,creneau.date,creneau["intitulé"])
         if (statut || (!((creneau.soon || (creneau.type_creneau==1) ) && creneau.staff == 0))) {
             divCreneaux.appendChild(noeud)
         }
