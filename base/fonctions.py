@@ -731,7 +731,7 @@ def recupere_stats_fonction(fonction,datedebut,datefin):
 def est_staff(request):
     if request.user.is_authenticated:
         lesgroupes=request.user.groups.all()
-        for groupe_staff in lesgroupes:
+        if groupe_staff in lesgroupes:
             return True
     return False
 
