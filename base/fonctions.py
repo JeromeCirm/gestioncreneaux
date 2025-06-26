@@ -728,4 +728,10 @@ def recupere_stats_fonction(fonction,datedebut,datefin):
     response={"creneau_et_staff" : res,"staff_en_or" : ordonne(res),"creneaux_stats" : ouverts(res)}
     return response
 
+def est_staff(request):
+    if request.user.is_authenticated:
+        lesgroupes=request.user.groups.all()
+        for groupe_staff in lesgroupes:
+            return True
+    return False
 

@@ -84,7 +84,7 @@ function click_creneau(id,avecclick=true) {
         if ('demande' in res) {
             document.location.href="connexion"
         } else {
-            affiche_creneau_general(res["creneaux"],res["inscription"])
+            affiche_creneau_general(res["creneaux"],res["inscription"],res["statut"])
         }
  	  })
   	  .catch(function(err){ console.log('Erreur requête', err);});
@@ -92,7 +92,7 @@ function click_creneau(id,avecclick=true) {
 
 /* insère les créneaux dans la DOM avec le style approprié au statut 
 partie principale accessible à tous */
-function affiche_creneau_general(creneaux,inscription) {
+function affiche_creneau_general(creneaux,inscription,statut) {
     var divCreneaux=document.getElementById('creneaux_general')
     divCreneaux.innerHTML="";
     for (var tmp in creneaux) {
@@ -100,7 +100,9 @@ function affiche_creneau_general(creneaux,inscription) {
         inter=creneau.pk
         var noeud=document.createElement('div')
         noeud.innerHTML=creneau.date+" :<BR>"+creneau["intitulé"]
-        divCreneaux.appendChild(noeud)
+        if (statut || (!((creneau.soon || (creneau.type_creneau==1) ) && creneau.staff == 0))) {
+            divCreneaux.appendChild(noeud)
+        }
         var noeud=document.createElement('div')
         var label=document.createElement('label')
         if (creneau.type_creneau==2) {
@@ -111,8 +113,8 @@ function affiche_creneau_general(creneaux,inscription) {
         } else {
             if ((creneau.soon || (creneau.type_creneau==1) ) && creneau.staff == 0) {
                 label.innerHTML="Créneau en attente"
-                label.setAttribute('class','round red')
-                noeud.appendChild(label)
+                    label.setAttribute('class','round red')
+                    noeud.appendChild(label)
             } else if (creneau.type_creneau==1) {
                 label.setAttribute('onclick','click_creneau('+inter.toString()+')')
                 if ((inter in inscription) && ((inscription[inter].statut=="staff_sibesoin_inscrit") 
@@ -133,7 +135,9 @@ function affiche_creneau_general(creneaux,inscription) {
                 noeud.appendChild(label)
             }
         } 
-        divCreneaux.appendChild(noeud)
+        if (statut || (!((creneau.soon || (creneau.type_creneau==1) ) && creneau.staff == 0))) {
+            divCreneaux.appendChild(noeud)
+        }
     }
 }
 

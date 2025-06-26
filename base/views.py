@@ -36,16 +36,17 @@ def auth(group_list=[]):
 # pages générales pour tout le monde
 def creneaux(request):
     if request.method=='POST':
+        statut=est_staff(request)
         if request.user.is_authenticated:
             click_creneau(request)
             response_data = {"creneaux":json_creneaux(request),
-            "inscription":json_inscription(request)}
+            "inscription":json_inscription(request),"statut" : statut}
         else:
             if ("avecclick" in request.POST) and (request.POST["avecclick"]=="true"):
                 # on redirigera vers la page de connexion 
                 response_data={"demande" : "creneaux"}
             else:
-                response_data={"creneaux":json_creneaux(request),"inscription" :{}}
+                response_data={"creneaux":json_creneaux(request),"inscription" :{},"statut" : statut}
         return HttpResponse(json.dumps(response_data), content_type="application/json")
     context={"menu" : menu_general(request)}
     context["annonce"]=recupere_annonce()
